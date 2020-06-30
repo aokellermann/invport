@@ -1,10 +1,10 @@
 /**
  * @file unit_test.cc
- * @author __cpptemplate_author__
- * @copyright 2020 __cpptemplate_author__
+ * @author author
+ * @copyright 2020 author
  */
 
-#include "__cpptemplate_name__/__cpptemplate_name__.h"
+#include "invport/invport.h"
 
 #include <gtest/gtest.h>
 

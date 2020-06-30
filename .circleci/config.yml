@@ -8,7 +8,7 @@ jobs:
       - checkout
       - run:
           name: Install required tools
-          command: "pacman -Sy --noconfirm base base-devel gcc git cmake doxygen gtest clang"
+          command: "pacman -Sy --noconfirm base base-devel gcc git cmake doxygen gtest clang iex-git"
 
       - run:
           name: Configure
@@ -25,4 +25,4 @@ jobs:
           command: "cmake --build build/"
       - run:
           name: Unit Test
-          command: "././build/__cpptemplate_name__/test/unit_test"
+          command: "././build/invport/test/unit_test"

@@ -17,19 +17,17 @@ Ensure all dependencies listed [here](../README.md#Dependencies) are installed.
 
 The project's `CMakeLists.txt` supports the following options:
 * `ENABLE_CXX_WARNINGS`: Turn on GCC/Clang compatible compiler warnings. Note: warnings will cause build to fail due to addition of `Werror`.
-* `BUILD_LIBRARY`: Builds library target.
-* `BUILD_EXECUTABLE`: Builds executable target.
 * `BUILD_TESTING`: Build unit test target.
 * `BUILD_DOCUMENTATION`: Build documentation using `doxygen`.
 
 To perform a weed whack build, run:
 ```bash
 mkdir build && cd build
-cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON -DBUILD_EXECUTABLE:BOOL=ON -DBUILD_LIBRARY:BOOL=ON -DBUILD_DOCUMENTATION:BOOL=ON -DBUILD_TESTING:BOOL=ON -DENABLE_CXX_WARNINGS:BOOL=ON ..
+cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON -DBUILD_DOCUMENTATION:BOOL=ON -DBUILD_TESTING:BOOL=ON -DENABLE_CXX_WARNINGS:BOOL=ON ..
 cd ..
 cmake --build build/
 ```
 After, you can run unit tests:
 ```bash
-././build/__cpptemplate_name__/test/unit_test
+././build/invport/test/unit_test
 ```

@@ -1,19 +1,19 @@
 # Maintainer: Antony Kellermann <aokellermann@gmail.com>
 
-_pkgname=__cpptemplate_name__
+_pkgname=invport
 pkgname="${_pkgname}-git"
 pkgver=0.0.1
 pkgrel=1
-pkgdesc="C++17 DFA simulator."
+pkgdesc="C++ investments tracker."
 arch=("x86_64")
-url="https://github.com/__cpptemplate_username__/${_pkgname}"
+url="https://github.com/aokellermann/${_pkgname}"
 license=("MIT")
 depends=()
 optdepends=("doxygen: documentation")
 makedepends=("cmake" "git")
 provides=("${_pkgname}")
 conflicts=("${_pkgname}")
-source=("git://github.com/__cpptemplate_username__/${_pkgname}")
+source=("git://github.com/aokellermann/${_pkgname}")
 md5sums=("SKIP")
 
 prepare() {

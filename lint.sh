@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Get all .cc and .h files in directory __cpptemplate_name__.
-files=$(find __cpptemplate_name__ -maxdepth 1 -type f \( -iname \*.cc -o -iname \*.h \))
+# Get all .cc and .h files in directory invport.
+files=$(find invport -maxdepth 1 -type f \( -iname \*.cc -o -iname \*.h \))
 
 compile_commands=$(find -type f -name compile_commands.json | head -n 1)
 if [ -z $compile_commands ]; then

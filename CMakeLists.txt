@@ -1,14 +1,12 @@
 cmake_minimum_required(VERSION 3.16)
-project(__cpptemplate_name__
+project(invport
         VERSION 0.0.1
         LANGUAGES CXX
-        DESCRIPTION "__cpptemplate_description__"
+        DESCRIPTION "C++ investments tracker."
         )
 message(STATUS "${PROJECT_NAME} version: ${PROJECT_VERSION}")
 
 # Options related to weed whacking, testing, and documentation.
-option(BUILD_EXECUTABLE "Build executable." ON)
-option(BUILD_LIBRARY "Build library." ON)
 option(BUILD_DOCUMENTATION "Build documentation." OFF)
 option(BUILD_TESTING "Build unit testing." OFF)
 option(ENABLE_CXX_WARNINGS "Enable GCC/Clang compatible compile options." OFF)
@@ -45,133 +43,37 @@ endif ()
 
 message(STATUS "EXTRA_COMPILE_OPTIONS: ${EXTRA_COMPILE_OPTIONS}")
 
-# Set library headers and sources.
-set(lib_headers
-        ${PROJECT_NAME}.h
-        )
-set(lib_sources
-        ${PROJECT_NAME}.cc
-        )
-
 # Set executable sources
 set(exec_sources
         main.cc
+        invport.cc
+        invport.h
         )
 
 # Specify source directory.
-list(TRANSFORM lib_headers PREPEND "${PROJECT_NAME}/")
-list(TRANSFORM lib_sources PREPEND "${PROJECT_NAME}/")
 list(TRANSFORM exec_sources PREPEND "${PROJECT_NAME}/")
 
 # Find dependencies.
+find_package(PkgConfig)
+pkg_check_modules(GTKMM REQUIRED gtkmm-3.0)
 find_package(Doxygen)
 
 # Define LIBDIR, INCLUDEDIR, DOCDIR
 include(GNUInstallDirs)
 
-# Create library if specified
-if (BUILD_LIBRARY)
-    # Create shared library.
-    add_library(${PROJECT_NAME} SHARED ${lib_sources})
-    target_include_directories(${PROJECT_NAME} PUBLIC
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-            )
-    target_compile_options(${PROJECT_NAME} PRIVATE ${EXTRA_COMPILE_OPTIONS})
-
-    # Link libaries
-    # target_link_libraries(${PROJECT_NAME})
-
-    # Install shared object.
-    install(TARGETS ${PROJECT_NAME}
-            EXPORT "${PROJECT_NAME}Targets"
-            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime
-            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT runtime
-            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT development
-            )
-
-    # Install public header(s).
-    install(FILES ${lib_headers}
-            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
-            COMPONENT development
-            )
-
-    # Export to the build tree.
-    set(export_file "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake")
-    export(TARGETS ${PROJECT_NAME}
-            NAMESPACE ${PROJECT_NAME}::
-            APPEND FILE ${export_file}
-            )
-
-    set(install_cmake_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
-
-    install(EXPORT "${PROJECT_NAME}Targets"
-            NAMESPACE ${PROJECT_NAME}::
-            DESTINATION ${install_cmake_dir}
-            )
-
-    install(FILES
-            ${CMAKE_CURRENT_BINARY_DIR}/cmake/${PROJECT_NAME}Config.cmake
-            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
-            DESTINATION ${install_cmake_dir}
-            )
-
-    include(CMakePackageConfigHelpers)
-
-    write_basic_package_version_file(${PROJECT_NAME}ConfigVersion.cmake
-            VERSION ${PROJECT_VERSION}
-            COMPATIBILITY SameMajorVersion
-            )
-
-    # Build tree
-    set(TARGETS_FILE ${export_file})
-    configure_package_config_file(
-            ${CMAKE_CURRENT_SOURCE_DIR}/cmake/${PROJECT_NAME}Config.cmake.in
-            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
-            INSTALL_DESTINATION ${install_cmake_dir}
-            PATH_VARS TARGETS_FILE
-            NO_CHECK_REQUIRED_COMPONENTS_MACRO
-            INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}
-    )
-
-    # Install tree
-    set(TARGETS_FILE ${CMAKE_INSTALL_PREFIX}/${install_cmake_dir}/${PROJECT_NAME}Targets.cmake)
-    configure_package_config_file(
-            ${CMAKE_CURRENT_SOURCE_DIR}/cmake/${PROJECT_NAME}Config.cmake.in
-            ${CMAKE_CURRENT_BINARY_DIR}/cmake/${PROJECT_NAME}Config.cmake
-            INSTALL_DESTINATION ${install_cmake_dir}
-            PATH_VARS TARGETS_FILE
-            NO_CHECK_REQUIRED_COMPONENTS_MACRO
-    )
-
-    # Add custom target to only install component: runtime (libraries)
-    add_custom_target(${PROJECT_NAME}-install-runtime
-            ${CMAKE_COMMAND}
-            -DCMAKE_INSTALL_COMPONENT=runtime
-            -P "${PROJECT_BINARY_DIR}/cmake_install.cmake"
-            DEPENDS ${PROJECT_NAME}
-            )
-
-    add_dependencies(${PROJECT_NAME}-install-runtime ${PROJECT_NAME})
-endif ()
-
 # Create executable if specified.
-if (BUILD_EXECUTABLE OR BUILD_LIBRARY)
-    set(EXEC_NAME __cpptemplate_exec_name__)
-    add_executable(${EXEC_NAME} ${exec_sources})
-    target_include_directories(${EXEC_NAME} PUBLIC
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-            $<INSTALL_INTERFACE:${CMAKE_INSTALL_BINDIR}>
-            )
-    target_compile_options(${EXEC_NAME} PRIVATE ${EXTRA_COMPILE_OPTIONS})
+set(EXEC_NAME invport)
+add_executable(${EXEC_NAME} ${exec_sources})
+target_include_directories(${EXEC_NAME} PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_BINDIR}>
+        )
+target_compile_options(${EXEC_NAME} PRIVATE ${EXTRA_COMPILE_OPTIONS})
 
-    target_link_libraries(${EXEC_NAME} ${PROJECT_NAME})
-
-    install(TARGETS ${EXEC_NAME}
-            DESTINATION ${CMAKE_INSTALL_BINDIR}
-            COMPONENT runtime
-            )
-endif ()
+install(TARGETS ${EXEC_NAME}
+        DESTINATION ${CMAKE_INSTALL_BINDIR}
+        COMPONENT runtime
+        )
 
 # Build GTest if unit testing enabled.
 if (BUILD_TESTING)
