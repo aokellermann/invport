@@ -56,6 +56,10 @@ set(exec_sources
         detail/keychain.cc
         detail/keychain.h
         detail/common.h
+        widget/base.h
+        widget/util.h
+        widget/key_selector.cc
+        widget/key_selector.h
         )
 
 # Specify source directory.
@@ -90,6 +94,10 @@ install(TARGETS ${EXEC_NAME}
         DESTINATION ${CMAKE_INSTALL_BINDIR}/${PROJECT_NAME}
         COMPONENT runtime
         )
+
+install(DIRECTORY
+        share/${PROJECT_NAME}
+        DESTINATION ${CMAKE_INSTALL_DATADIR})
 
 install(FILES
         LICENSE
