@@ -91,9 +91,9 @@ class FileIoBase
 
   [[nodiscard]] std::string GetExtensionString(Extension extension);
 
+  ErrorCode ec_;
   const Path directory_path_;
   const Path full_path_;
-  ErrorCode ec_;
 };
 
 }  // namespace inv::file
