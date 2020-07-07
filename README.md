@@ -18,6 +18,9 @@ makepkg -si
 Building from source requires the installation of all necessary dependencies:
 * [cmake](https://github.com/Kitware/CMake) (build only)
 * [doxygen](https://github.com/doxygen/doxygen) (optional documentation)
+* [iex](https://github.com/aokellermann/iex)
+* [spdlog](https://github.com/gabime/spdlog)
+* [gtkmm3](https://gitlab.gnome.org/GNOME/gtkmm)
 
 ##### Clone and Build
 After dependencies are installed, run from a shell:
