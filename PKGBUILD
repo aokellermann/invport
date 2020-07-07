@@ -8,7 +8,7 @@ pkgdesc="C++ investments tracker."
 arch=("x86_64")
 url="https://github.com/aokellermann/${_pkgname}"
 license=("MIT")
-depends=()
+depends=("iex")
 optdepends=("doxygen: documentation")
 makedepends=("cmake" "git")
 provides=("${_pkgname}")
@@ -28,5 +28,4 @@ build() {
 
 package() {
   cmake --build "${_pkgname}/build" --target install -- DESTDIR="${pkgdir}"
-  install -Dm644 "${_pkgname}/LICENSE" "${pkgdir}/usr/share/licenses/${_pkgname}/LICENSE"
 }

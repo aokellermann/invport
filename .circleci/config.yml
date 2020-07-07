@@ -8,7 +8,12 @@ jobs:
       - checkout
       - run:
           name: Install required tools
-          command: "pacman -Sy --noconfirm base base-devel gcc git cmake doxygen gtest clang iex-git"
+          command: |
+            pacman -Sy --noconfirm base base-devel gcc git cmake doxygen gtest clang curl nlohmann-json gtkmm3
+            git clone https://github.com/aokellermann/iex.git
+            mkdir iex/build && cd iex/build
+            cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr ..
+            make install
 
       - run:
           name: Configure
@@ -16,7 +21,7 @@ jobs:
             rm -rf build
             mkdir build
             cd build
-            cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON -DBUILD_EXECUTABLE:BOOL=ON -DBUILD_LIBRARY:BOOL=ON -DBUILD_DOCUMENTATION:BOOL=ON -DBUILD_TESTING:BOOL=ON -DENABLE_CXX_WARNINGS:BOOL=ON ..
+            cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON -DBUILD_DOCUMENTATION:BOOL=ON -DBUILD_TESTING:BOOL=ON -DENABLE_CXX_WARNINGS:BOOL=ON ..
       - run:
           name: Style
           command: "./lint.sh"

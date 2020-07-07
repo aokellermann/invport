@@ -8,7 +8,7 @@ message(STATUS "${PROJECT_NAME} version: ${PROJECT_VERSION}")
 
 # Options related to weed whacking, testing, and documentation.
 option(BUILD_DOCUMENTATION "Build documentation." OFF)
-option(BUILD_TESTING "Build unit testing." OFF)
+option(BUILD_TESTING "Build unit testing." ON)
 option(ENABLE_CXX_WARNINGS "Enable GCC/Clang compatible compile options." OFF)
 
 # Set configuration: Either Debug, Release (default), MinSizeRel, or RelWithDebInfo.
@@ -44,10 +44,18 @@ endif ()
 message(STATUS "EXTRA_COMPILE_OPTIONS: ${EXTRA_COMPILE_OPTIONS}")
 
 # Set executable sources
+set(exec_main ${PROJECT_NAME}/main.cc)
+
 set(exec_sources
-        main.cc
         invport.cc
         invport.h
+        detail/env.cc
+        detail/env.h
+        detail/file_serializable.cc
+        detail/file_serializable.h
+        detail/keychain.cc
+        detail/keychain.h
+        detail/common.h
         )
 
 # Specify source directory.
@@ -56,27 +64,41 @@ list(TRANSFORM exec_sources PREPEND "${PROJECT_NAME}/")
 # Find dependencies.
 find_package(PkgConfig)
 pkg_check_modules(GTKMM REQUIRED gtkmm-3.0)
+find_package(iex REQUIRED)
 find_package(Doxygen)
 
 # Define LIBDIR, INCLUDEDIR, DOCDIR
 include(GNUInstallDirs)
 
 # Create executable if specified.
-set(EXEC_NAME invport)
-add_executable(${EXEC_NAME} ${exec_sources})
+set(EXEC_NAME _${PROJECT_NAME})
+add_executable(${EXEC_NAME} ${exec_main} ${exec_sources})
 target_include_directories(${EXEC_NAME} PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_BINDIR}>
         )
 target_compile_options(${EXEC_NAME} PRIVATE ${EXTRA_COMPILE_OPTIONS})
 
+target_link_libraries(${EXEC_NAME} ${GTKMM_LIBRARIES} iex::iex)
+
+#Install
 install(TARGETS ${EXEC_NAME}
-        DESTINATION ${CMAKE_INSTALL_BINDIR}
+        DESTINATION ${CMAKE_INSTALL_BINDIR}/${PROJECT_NAME}
         COMPONENT runtime
         )
 
+install(FILES
+        LICENSE
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/${PROJECT_NAME})
+
 # Build GTest if unit testing enabled.
 if (BUILD_TESTING)
+    add_library(invport_lib STATIC ${exec_sources})
+    target_include_directories(invport_lib PUBLIC
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+            )
+
     enable_testing()
     set(INSTALL_GTEST OFF)
     set(CMAKE_POLICY_DEFAULT_CMP0077 NEW) # Propagate INSTALL_GTEST=OFF to subproject
