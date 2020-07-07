@@ -65,6 +65,7 @@ list(TRANSFORM exec_sources PREPEND "${PROJECT_NAME}/")
 find_package(PkgConfig)
 pkg_check_modules(GTKMM REQUIRED gtkmm-3.0)
 find_package(iex REQUIRED)
+find_package(spdlog REQUIRED)
 find_package(Doxygen)
 
 # Define LIBDIR, INCLUDEDIR, DOCDIR
@@ -79,7 +80,7 @@ target_include_directories(${EXEC_NAME} PUBLIC
         )
 target_compile_options(${EXEC_NAME} PRIVATE ${EXTRA_COMPILE_OPTIONS})
 
-target_link_libraries(${EXEC_NAME} ${GTKMM_LIBRARIES} iex::iex)
+target_link_libraries(${EXEC_NAME} ${GTKMM_LIBRARIES} iex::iex spdlog::spdlog)
 
 #Install
 install(TARGETS ${EXEC_NAME}
