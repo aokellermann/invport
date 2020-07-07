@@ -9,7 +9,7 @@ jobs:
       - run:
           name: Install required tools
           command: |
-            pacman -Sy --noconfirm base base-devel gcc git cmake doxygen gtest clang curl nlohmann-json gtkmm3
+            pacman -Sy --noconfirm base base-devel gcc git cmake doxygen gtest clang curl nlohmann-json gtkmm3 spdlog
             git clone https://github.com/aokellermann/iex.git
             mkdir iex/build && cd iex/build
             cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr ..
