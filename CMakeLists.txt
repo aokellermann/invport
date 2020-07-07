@@ -71,7 +71,7 @@ find_package(Doxygen)
 include(GNUInstallDirs)
 
 # Create executable if specified.
-set(EXEC_NAME invport)
+set(EXEC_NAME _${PROJECT_NAME})
 add_executable(${EXEC_NAME} ${exec_main} ${exec_sources})
 target_include_directories(${EXEC_NAME} PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
@@ -83,7 +83,7 @@ target_link_libraries(${EXEC_NAME} ${GTKMM_LIBRARIES} iex::iex)
 
 #Install
 install(TARGETS ${EXEC_NAME}
-        DESTINATION ${CMAKE_INSTALL_BINDIR}
+        DESTINATION ${CMAKE_INSTALL_BINDIR}/${PROJECT_NAME}
         COMPONENT runtime
         )
 
