@@ -71,6 +71,9 @@ find_package(Doxygen)
 # Define LIBDIR, INCLUDEDIR, DOCDIR
 include(GNUInstallDirs)
 
+# gtkmm3 include dirs
+include_directories(SYSTEM ${GTKMM_INCLUDE_DIRS})
+
 # Create executable if specified.
 set(EXEC_NAME _${PROJECT_NAME})
 add_executable(${EXEC_NAME} ${exec_main} ${exec_sources})
