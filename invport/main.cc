@@ -36,7 +36,7 @@ int main(int argc, char **argv)
   // Parse glade file
   try
   {
-    builder->add_from_file("../share/invport/key_selector.glade");
+    builder->add_from_file("../share/invport/invport.glade");
   }
   catch (const Glib::FileError &ex)
   {

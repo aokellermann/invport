@@ -14,6 +14,9 @@
 
 namespace inv::widget
 {
+/**
+ * This dialog is used to allow manual key entry from the user.
+ */
 class KeySelector : public Gtk::MessageDialog, private WidgetBase
 {
   using Keychain = inv::key::Keychain;

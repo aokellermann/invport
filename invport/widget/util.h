@@ -26,8 +26,16 @@ inline void AssertWidgetIsValid(const Gtk::Widget* widget)
 }
 }  // namespace detail
 
+/**
+ * Gets a widget from a builder.
+ * @tparam T The type of widget.
+ * @param builder The builder that contains the widget.
+ * @param name The name of the widget.
+ * @warning Exits if widget is not found.
+ * @return A reference to the widget.
+ */
 template <typename T>
-static T& GetWidget(const Glib::RefPtr<Gtk::Builder>& builder, const std::string& name)
+T& GetWidget(const Glib::RefPtr<Gtk::Builder>& builder, const std::string& name)
 {
   T* widget;
   builder->get_widget(name, widget);
@@ -35,8 +43,17 @@ static T& GetWidget(const Glib::RefPtr<Gtk::Builder>& builder, const std::string
   return *widget;
 }
 
+/**
+ * Gets a derived widget from a builder.
+ * @tparam T The derived type of widget.
+ * @tparam Args Type of args passed to constructor.
+ * @param builder The builder that contains the widget.
+ * @param name The name of the widget.
+ * @param args Parameter pack of args passed to constructor.
+ * @return A reference to the widget.
+ */
 template <typename T, typename... Args>
-static T& GetWidgetDerived(const Glib::RefPtr<Gtk::Builder>& builder, const std::string& name, Args&&... args)
+T& GetWidgetDerived(const Glib::RefPtr<Gtk::Builder>& builder, const std::string& name, Args&&... args)
 {
   T* widget;
   builder->get_widget_derived(name, widget, args...);
