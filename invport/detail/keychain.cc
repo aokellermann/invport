@@ -170,7 +170,7 @@ bool Keychain::Populated() const noexcept
 
 // region Serialization
 
-ValueWithErrorCode<json::Json> Keychain::Serialize()
+ValueWithErrorCode<json::Json> Keychain::Serialize() const
 {
   if (ec_.Failure())
   {

@@ -56,6 +56,8 @@ set(exec_sources
         detail/keychain.cc
         detail/keychain.h
         detail/common.h
+        detail/cache.cc
+        detail/cache.h
         )
 
 # Specify source directory.
