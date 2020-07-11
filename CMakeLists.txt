@@ -56,6 +56,10 @@ set(exec_sources
         detail/keychain.cc
         detail/keychain.h
         detail/common.h
+        widget/base.h
+        widget/util.h
+        widget/key_selector.cc
+        widget/key_selector.h
         )
 
 # Specify source directory.
@@ -70,6 +74,9 @@ find_package(Doxygen)
 
 # Define LIBDIR, INCLUDEDIR, DOCDIR
 include(GNUInstallDirs)
+
+# gtkmm3 include dirs
+include_directories(SYSTEM ${GTKMM_INCLUDE_DIRS})
 
 # Create executable if specified.
 set(EXEC_NAME _${PROJECT_NAME})
@@ -87,6 +94,10 @@ install(TARGETS ${EXEC_NAME}
         DESTINATION ${CMAKE_INSTALL_BINDIR}/${PROJECT_NAME}
         COMPONENT runtime
         )
+
+install(DIRECTORY
+        share/${PROJECT_NAME}
+        DESTINATION ${CMAKE_INSTALL_DATADIR})
 
 install(FILES
         LICENSE
