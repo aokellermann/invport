@@ -18,7 +18,7 @@
 
 namespace fs = std::filesystem;
 
-using Cache = inv::Cache;
+using Cache = inv::cache::Cache;
 
 const std::vector<const char*> kSymbols = {
     "aapl", "msft", "tsla", "intc", "amd", "bynd", "aig+", "brk.a", "ver-f", "mj", "qqq", "arkq", "robo",

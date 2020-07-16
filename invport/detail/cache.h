@@ -14,8 +14,14 @@
 #include "invport/detail/common.h"
 #include "invport/detail/file_serializable.h"
 
-namespace inv
+/**
+ * Contains classes and methods for manipulating a cache of IEX endpoints.
+ */
+namespace inv::cache
 {
+/**
+ * Contains methods for caching IEX endpoints. All data is kept in memory.
+ */
 class Cache : private file::FileIoBase, private json::JsonBidirectionalSerializable
 {
  public:
@@ -27,12 +33,28 @@ class Cache : private file::FileIoBase, private json::JsonBidirectionalSerializa
   template <typename E = Endpoint>
   using EndpointPtr = iex::EndpointPtr<E>;
 
+  /**
+   * Constructs a Cache in the specified directory.
+   * @param directory
+   */
   explicit Cache(file::Directory directory = file::Directory::HOME);
 
+  /**
+   * Writes the Cache's data to a file on destruction.
+   */
   inline ~Cache() override { Flush(); }
 
+  /**
+   * Write's the Cache's data to a file.
+   * @return whether the write was successful or not
+   */
   ErrorCode Flush() const;
 
+  /**
+   * Gets an Endpoint from the Cache.
+   * @tparam Type the EndpointType to get
+   * @return valid pointer if exists, nullptr if not
+   */
   template <EndpointType Type>
   EndpointPtr<iex::EndpointTypename<Type>> Get() const
   {
@@ -45,6 +67,12 @@ class Cache : private file::FileIoBase, private json::JsonBidirectionalSerializa
     return nullptr;
   }
 
+  /**
+   * Gets a SymbolEndpoint from the Cache.
+   * @tparam Type the EndpointType to get
+   * @param symbol the symbol of the endpoint
+   * @return valid pointer if exists, nullptr if not
+   */
   template <EndpointType Type>
   EndpointPtr<iex::EndpointTypename<Type>> Get(const Symbol& symbol) const
   {
@@ -61,12 +89,20 @@ class Cache : private file::FileIoBase, private json::JsonBidirectionalSerializa
     return nullptr;
   }
 
+  /**
+   * Adds an Endpoint to the Cache.
+   * @param endpoint_ptr the pointer to add
+   */
   template <typename E>
   std::enable_if_t<std::negation_v<std::is_base_of<SymbolEndpoint, E>>, void> Set(EndpointPtr<E> endpoint_ptr)
   {
-     endpoint_index_[endpoint_ptr->GetType()] = std::move(endpoint_ptr);
+    endpoint_index_[endpoint_ptr->GetType()] = std::move(endpoint_ptr);
   }
 
+  /**
+   * Adds a SymbolEndpoint to the Cache.
+   * @param endpoint_ptr the pointer to add
+   */
   void Set(EndpointPtr<SymbolEndpoint> endpoint_ptr)
   {
     stock_index_[endpoint_ptr->symbol][endpoint_ptr->GetType()] = std::move(endpoint_ptr);
@@ -84,4 +120,4 @@ class Cache : private file::FileIoBase, private json::JsonBidirectionalSerializa
   EndpointMap endpoint_index_;
   SecurityIndex stock_index_;
 };
-}  // namespace inv
+}  // namespace inv::cache

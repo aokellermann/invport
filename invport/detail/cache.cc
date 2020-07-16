@@ -15,7 +15,7 @@
 #include <memory>
 #include <type_traits>
 
-namespace inv
+namespace inv::cache
 {
 namespace
 {
@@ -61,7 +61,7 @@ ValueWithErrorCode<EndpointPtr<SymbolEndpoint>> EndpointFactory(const json::Json
 }
 }  // namespace
 
-inv::Cache::Cache(const file::Directory directory)
+Cache::Cache(const file::Directory directory)
     : file::FileIoBase("cache", directory), json::JsonBidirectionalSerializable()
 {
   auto vec = ReadFile();
@@ -130,7 +130,6 @@ ValueWithErrorCode<json::Json> Cache::Serialize() const
       ++i;
     }
 
-    std::string jstr = json.dump();
     return {std::move(json), std::move(ec)};
   }
   catch (const std::exception& e)
@@ -142,8 +141,6 @@ ValueWithErrorCode<json::Json> Cache::Serialize() const
 ErrorCode Cache::Deserialize(const json::Json& input_json)
 {
   ErrorCode ec;
-
-  std::string jstr = input_json.dump();
 
   try
   {
@@ -223,4 +220,4 @@ ErrorCode Cache::Deserialize(const json::Json& input_json)
     return ErrorCode("Cache::Deserialize() failed", ErrorCode(e.what()));
   }
 }
-}  // namespace inv
+}  // namespace inv::cache
