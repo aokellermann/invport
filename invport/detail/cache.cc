@@ -26,6 +26,8 @@ using Symbol = Cache::Symbol;
 template <typename E = Endpoint>
 using EndpointPtr = Cache::EndpointPtr<E>;
 
+constexpr const char* const kEndpointIndexName = "endpoint_index";
+
 constexpr const char* const kIndexNames[] = {"stock_index"};
 
 template <typename E = Endpoint>
@@ -93,6 +95,19 @@ ValueWithErrorCode<json::Json> Cache::Serialize() const
   {
     json::Json json;
 
+    for (const auto& [type, endpoint] : endpoint_index_)
+    {
+      auto serialize_vec = endpoint->Serialize();
+      if (serialize_vec.second.Success())
+      {
+        json[kEndpointIndexName][std::to_string(static_cast<int>(type))] = std::move(serialize_vec.first);
+      }
+      else
+      {
+        ec = std::move(serialize_vec.second);
+      }
+    }
+
     std::size_t i = 0;
     for (const auto& index : {stock_index_})
     {
@@ -132,8 +147,38 @@ ErrorCode Cache::Deserialize(const json::Json& input_json)
 
   try
   {
+    const auto json_endpoint_index_reference = input_json.find(kEndpointIndexName);
+    if (json_endpoint_index_reference != input_json.end())
+    {
+      for (const auto& [type_s, endpoint] : json_endpoint_index_reference->items())
+      {
+        ValueWithErrorCode<EndpointPtr<>> vec;
+        const auto type = static_cast<Endpoint::Type>(std::stoi(type_s));
+        switch (type)
+        {
+          case Endpoint::Type::SYMBOLS:
+            vec = EndpointFactory<iex::EndpointTypename<Endpoint::Type::SYMBOLS>>(endpoint);
+            break;
+          case Endpoint::Type::SYSTEM_STATUS:
+            vec = EndpointFactory<iex::EndpointTypename<Endpoint::Type::SYSTEM_STATUS>>(endpoint);
+            break;
+
+          default:
+            break;
+        }
+        if (vec.second.Success())
+        {
+          endpoint_index_[type] = std::move(vec.first);
+        }
+        else
+        {
+          ec = std::move(vec.second);
+        }
+      }
+    }
+
     std::size_t i = 0;
-    for (auto& index : {&stock_index_})
+    for (const auto& index : {&stock_index_})
     {
       auto json_index_reference = input_json.find(kIndexNames[i]);
       if (json_index_reference != input_json.end())

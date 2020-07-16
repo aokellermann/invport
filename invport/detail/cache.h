@@ -34,6 +34,18 @@ class Cache : private file::FileIoBase, private json::JsonBidirectionalSerializa
   ErrorCode Flush() const;
 
   template <EndpointType Type>
+  EndpointPtr<iex::EndpointTypename<Type>> Get() const
+  {
+    const auto endpoint_map_iter = endpoint_index_.find(Type);
+    if (endpoint_map_iter != endpoint_index_.end())
+    {
+      return std::dynamic_pointer_cast<iex::EndpointTypename<Type>>(endpoint_map_iter->second);
+    }
+
+    return nullptr;
+  }
+
+  template <EndpointType Type>
   EndpointPtr<iex::EndpointTypename<Type>> Get(const Symbol& symbol) const
   {
     const auto stock_index_iter = stock_index_.find(symbol);
@@ -49,6 +61,12 @@ class Cache : private file::FileIoBase, private json::JsonBidirectionalSerializa
     return nullptr;
   }
 
+  template <typename E>
+  std::enable_if_t<std::negation_v<std::is_base_of<SymbolEndpoint, E>>, void> Set(EndpointPtr<E> endpoint_ptr)
+  {
+     endpoint_index_[endpoint_ptr->GetType()] = std::move(endpoint_ptr);
+  }
+
   void Set(EndpointPtr<SymbolEndpoint> endpoint_ptr)
   {
     stock_index_[endpoint_ptr->symbol][endpoint_ptr->GetType()] = std::move(endpoint_ptr);
@@ -59,9 +77,11 @@ class Cache : private file::FileIoBase, private json::JsonBidirectionalSerializa
 
   ErrorCode Deserialize(const json::Json& input_json) final;
 
+  using EndpointMap = std::unordered_map<EndpointType, EndpointPtr<Endpoint>>;
   using SymbolEndpointMap = std::unordered_map<EndpointType, EndpointPtr<SymbolEndpoint>>;
   using SecurityIndex = iex::SymbolMap<SymbolEndpointMap>;
 
+  EndpointMap endpoint_index_;
   SecurityIndex stock_index_;
 };
 }  // namespace inv

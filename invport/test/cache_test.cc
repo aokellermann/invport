@@ -9,6 +9,8 @@
 #include <gtest/gtest.h>
 #include <iex/api/company.h>
 #include <iex/api/quote.h>
+#include <iex/api/symbols.h>
+#include <iex/api/system_status.h>
 #include <iex/iex.h>
 
 #include <filesystem>
@@ -39,11 +41,18 @@ Cache PopulatedCacheFactory()
 {
   Cache cache = CacheFactory();
 
+  iex::json::JsonStorage storage{iex::json::Json::object()};
+
+  iex::EndpointPtr<iex::Symbols> symbols_ptr = std::make_shared<iex::Symbols>(storage);
+  iex::EndpointPtr<iex::SystemStatus> status_ptr = std::make_shared<iex::SystemStatus>(storage);
+
+  cache.Set(symbols_ptr);
+  cache.Set(status_ptr);
+
   for (const auto& sym : kSymbols)
   {
     iex::Symbol symbol(sym);
 
-    iex::json::JsonStorage storage{iex::json::Json::object()};
     iex::EndpointPtr<iex::Quote> quote_ptr = std::make_shared<iex::Quote>(storage, symbol);
     iex::EndpointPtr<iex::Company> company_ptr = std::make_shared<iex::Company>(storage, symbol);
 
@@ -60,6 +69,9 @@ TEST(Cache, EmptyGet)
 
   Cache cache = CacheFactory();
 
+  EXPECT_EQ(cache.Get<iex::Endpoint::Type::SYMBOLS>(), nullptr);
+  EXPECT_EQ(cache.Get<iex::Endpoint::Type::SYSTEM_STATUS>(), nullptr);
+
   for (const auto& sym : kSymbols)
   {
     iex::Symbol symbol(sym);
@@ -73,6 +85,9 @@ TEST(Cache, Set)
   DeleteCache();
 
   Cache cache = PopulatedCacheFactory();
+
+  EXPECT_NE(cache.Get<iex::Endpoint::Type::SYMBOLS>(), nullptr);
+  EXPECT_NE(cache.Get<iex::Endpoint::Type::SYSTEM_STATUS>(), nullptr);
 
   for (const auto& sym : kSymbols)
   {
@@ -101,6 +116,10 @@ TEST(Cache, Serialization)
   }
 
   Cache cache = CacheFactory();
+
+  EXPECT_NE(cache.Get<iex::Endpoint::Type::SYMBOLS>(), nullptr);
+  EXPECT_NE(cache.Get<iex::Endpoint::Type::SYSTEM_STATUS>(), nullptr);
+
   for (const auto& sym : kSymbols)
   {
     iex::Symbol symbol(sym);
