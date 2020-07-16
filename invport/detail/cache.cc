@@ -44,7 +44,7 @@ ValueWithErrorCode<EndpointPtr<>> EndpointFactory(const json::Json& input_json)
 }
 
 template <typename E = SymbolEndpoint>
-ValueWithErrorCode<EndpointPtr<>> EndpointFactory(const json::Json& input_json, Symbol symbol)
+ValueWithErrorCode<EndpointPtr<SymbolEndpoint>> EndpointFactory(const json::Json& input_json, Symbol symbol)
 {
   static_assert(std::is_base_of<SymbolEndpoint, E>::value, "E must derive from SymbolEndpoint");
 
@@ -59,7 +59,8 @@ ValueWithErrorCode<EndpointPtr<>> EndpointFactory(const json::Json& input_json, 
 }
 }  // namespace
 
-inv::Cache::Cache() : file::FileIoBase("cache"), json::JsonBidirectionalSerializable()
+inv::Cache::Cache(const file::Directory directory)
+    : file::FileIoBase("cache", directory), json::JsonBidirectionalSerializable()
 {
   auto vec = ReadFile();
   if (vec.second.Success() && !vec.first.empty())
@@ -95,31 +96,18 @@ ValueWithErrorCode<json::Json> Cache::Serialize() const
     std::size_t i = 0;
     for (const auto& index : {stock_index_})
     {
-      auto json_index_reference = json[kIndexNames[i]];
-
       for (const auto& [symbol, endpoint_map] : index)
       {
-        auto json_symbol_reference = json_index_reference[symbol.Get()];
-
-        for (const auto& [_, endpoint] : endpoint_map)
+        for (const auto& [type, endpoint] : endpoint_map)
         {
-          auto vec = endpoint->Serialize();
-          if (vec.second.Success())
+          auto serialize_vec = endpoint->Serialize();
+          if (serialize_vec.second.Success())
           {
-            auto serialize_vec = endpoint->Serialize();
-            if (serialize_vec.second.Success())
-            {
-              json_symbol_reference[std::to_string(static_cast<int>(endpoint->GetType()))] =
-                  std::move(serialize_vec.first);
-            }
-            else
-            {
-              ec = std::move(serialize_vec.second);
-            }
+            json[kIndexNames[i]][symbol.Get()][std::to_string(static_cast<int>(type))] = std::move(serialize_vec.first);
           }
           else
           {
-            ec = std::move(vec.second);
+            ec = std::move(serialize_vec.second);
           }
         }
       }
@@ -127,6 +115,7 @@ ValueWithErrorCode<json::Json> Cache::Serialize() const
       ++i;
     }
 
+    std::string jstr = json.dump();
     return {std::move(json), std::move(ec)};
   }
   catch (const std::exception& e)
@@ -139,6 +128,8 @@ ErrorCode Cache::Deserialize(const json::Json& input_json)
 {
   ErrorCode ec;
 
+  std::string jstr = input_json.dump();
+
   try
   {
     std::size_t i = 0;
@@ -150,19 +141,12 @@ ErrorCode Cache::Deserialize(const json::Json& input_json)
         for (auto& json_symbol : json_index_reference->items())
         {
           const Symbol symbol(json_symbol.key());
-          auto& symbol_reference = (*index)[symbol];
-
           for (const auto& json_endpoint : json_symbol.value().items())
           {
-            ValueWithErrorCode<EndpointPtr<>> vec;
-            switch (std::stoi(json_endpoint.key()))
+            ValueWithErrorCode<EndpointPtr<SymbolEndpoint>> vec;
+            const auto type = static_cast<Endpoint::Type>(std::stoi(json_endpoint.key()));
+            switch (type)
             {
-              case Endpoint::Type::SYMBOLS:
-                vec = EndpointFactory<iex::EndpointTypename<Endpoint::Type::SYMBOLS>>(json_endpoint.value());
-                break;
-              case Endpoint::Type::SYSTEM_STATUS:
-                vec = EndpointFactory<iex::EndpointTypename<Endpoint::Type::SYSTEM_STATUS>>(json_endpoint.value());
-                break;
               case Endpoint::Type::QUOTE:
                 vec = EndpointFactory<iex::EndpointTypename<Endpoint::Type::QUOTE>>(json_endpoint.value(), symbol);
                 break;
@@ -175,7 +159,7 @@ ErrorCode Cache::Deserialize(const json::Json& input_json)
             }
             if (vec.second.Success())
             {
-              symbol_reference[vec.first->GetType()] = std::move(vec.first);
+              (*index)[symbol][type] = std::move(vec.first);
             }
             else
             {

@@ -27,7 +27,7 @@ class Cache : private file::FileIoBase, private json::JsonBidirectionalSerializa
   template <typename E = Endpoint>
   using EndpointPtr = iex::EndpointPtr<E>;
 
-  Cache();
+  explicit Cache(file::Directory directory = file::Directory::HOME);
 
   inline ~Cache() override { Flush(); }
 
@@ -49,10 +49,9 @@ class Cache : private file::FileIoBase, private json::JsonBidirectionalSerializa
     return nullptr;
   }
 
-  template <EndpointType Type>
-  void Set(EndpointPtr<> endpoint_ptr, const Symbol& symbol)
+  void Set(EndpointPtr<SymbolEndpoint> endpoint_ptr)
   {
-    stock_index_[symbol][Type] = std::move(endpoint_ptr);
+    stock_index_[endpoint_ptr->symbol][endpoint_ptr->GetType()] = std::move(endpoint_ptr);
   }
 
  private:
@@ -60,8 +59,8 @@ class Cache : private file::FileIoBase, private json::JsonBidirectionalSerializa
 
   ErrorCode Deserialize(const json::Json& input_json) final;
 
-  using EndpointMap = std::unordered_map<EndpointType, EndpointPtr<>>;
-  using SecurityIndex = iex::SymbolMap<EndpointMap>;
+  using SymbolEndpointMap = std::unordered_map<EndpointType, EndpointPtr<SymbolEndpoint>>;
+  using SecurityIndex = iex::SymbolMap<SymbolEndpointMap>;
 
   SecurityIndex stock_index_;
 };
