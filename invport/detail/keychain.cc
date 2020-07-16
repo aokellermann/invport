@@ -113,6 +113,8 @@ ErrorCode Keychain::Set(KeyType type, const Key& key, bool write)
     return {"Keychain::Set() failed", std::move(validity)};
   }
 
+  keys_[type] = key;
+
   if (write)
   {
     if (key_location_ == ENVIRONMENT)
@@ -139,7 +141,6 @@ ErrorCode Keychain::Set(KeyType type, const Key& key, bool write)
     }
   }
 
-  keys_[type] = std::move(key);
   return {};
 }
 
