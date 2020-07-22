@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Get all .cc and .h files in directory invport.
-files=$(find invport -type f \( -iname \*.cc -o -iname \*.h \))
+files=$(find invport invport/detail invport/widget -maxdepth 1 -type f \( -iname \*.cc -o -iname \*.h \))
 
 compile_commands=$(find -type f -name compile_commands.json | head -n 1)
 if [ -z $compile_commands ]; then
