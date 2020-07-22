@@ -56,6 +56,8 @@ set(exec_sources
         detail/keychain.cc
         detail/keychain.h
         detail/common.h
+        detail/cache.cc
+        detail/cache.h
         widget/base.h
         widget/util.h
         widget/key_selector.cc
