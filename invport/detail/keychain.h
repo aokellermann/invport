@@ -93,7 +93,7 @@ class Keychain : private file::FileIoBase, private iex::json::JsonBidirectionalS
   [[nodiscard]] const ErrorCode& KeychainValidity() const noexcept { return ec_; }
 
  private:
-  ValueWithErrorCode<iex::json::Json> Serialize() const final;
+  [[nodiscard]] ValueWithErrorCode<iex::json::Json> Serialize() const final;
 
   ErrorCode Deserialize(const iex::json::Json& input_json) final;
 
