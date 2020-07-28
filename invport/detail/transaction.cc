@@ -23,6 +23,15 @@ constexpr const char* const kBuyStr = "Buy";
 constexpr const char* const kSellStr = "Sell";
 }  // namespace
 
+Transaction Transaction::Factory(const json::Json& input_json) {
+  Transaction tr;
+  auto ec = tr.Deserialize(input_json);
+  if (ec.Failure())
+    throw std::runtime_error(ErrorCode("Transaction::Factory() failed", std::move(ec)));
+
+  return tr;
+}
+
 const char* Transaction::TypeToString(const Transaction::Type t) { return t == BUY ? kBuyStr : kSellStr; }
 
 [[nodiscard]] ValueWithErrorCode<json::Json> Transaction::Serialize() const

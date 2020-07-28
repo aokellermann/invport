@@ -22,6 +22,7 @@ struct Transaction : json::JsonBidirectionalSerializable
   using Tag = std::string;
   using Tags = std::forward_list<Tag>;
   using Comment = std::string;
+  using ID = uint64_t;
 
   enum Type
   {
@@ -43,6 +44,8 @@ struct Transaction : json::JsonBidirectionalSerializable
   {
   }
 
+  static Transaction Factory(const json::Json& input_json);
+
   static const char* TypeToString(const Type t);
 
   [[nodiscard]] ValueWithErrorCode<json::Json> Serialize() const override;
@@ -57,7 +60,7 @@ struct Transaction : json::JsonBidirectionalSerializable
   bool operator>=(const Transaction& other) { return !(*this < other); }
 
   /**
-   *
+   * The date of the transaction
    */
   Timestamp date;
   /**
@@ -88,6 +91,10 @@ struct Transaction : json::JsonBidirectionalSerializable
    * User-defined comment
    */
   Comment comment;
+  /**
+   * Unique transaction id
+   */
+  ID id;
 };
 
 }  // namespace inv
