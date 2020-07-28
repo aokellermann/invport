@@ -10,6 +10,7 @@ namespace inv
 {
 namespace
 {
+constexpr static json::MemberName kJsonIDKey = "id";
 constexpr static json::MemberName kJsonDateKey = "date";
 constexpr static json::MemberName kJsonSymbolKey = "symbol";
 constexpr static json::MemberName kJsonTypeKey = "type";
@@ -40,6 +41,7 @@ const char* Transaction::TypeToString(const Transaction::Type t) { return t == B
 
   try
   {
+    json[kJsonIDKey] = id;
     json[kJsonDateKey] = date.count();
     json[kJsonSymbolKey] = symbol.Get();
     json[kJsonTypeKey] = type;
@@ -60,6 +62,7 @@ ErrorCode Transaction::Deserialize(const json::Json& input_json)
 {
   try
   {
+    input_json.find(kJsonIDKey)->get_to(id);
     date = decltype(date)(input_json[kJsonDateKey]);
     symbol = decltype(symbol)(input_json[kJsonSymbolKey]);
     input_json.find(kJsonTypeKey)->get_to(type);
@@ -75,12 +78,6 @@ ErrorCode Transaction::Deserialize(const json::Json& input_json)
   }
 
   return {};
-}
-
-bool Transaction::operator==(const Transaction& other) const
-{
-  return date == other.date && symbol == other.symbol && type == other.type && price == other.price &&
-         quantity == other.quantity && fee == other.fee && tags == other.tags && comment == other.comment;
 }
 
 }  // namespace inv
