@@ -11,18 +11,59 @@
 #include "invport/detail/common.h"
 #include "invport/detail/utils.h"
 
-using Transaction = inv::Transaction;
+using TransactionPool = inv::TransactionPool;
+using Transaction = TransactionPool::Transaction;
 
-const Transaction basic_sell_transaction(inv::util::GetTodayDate(), inv::Symbol("tsla"), Transaction::Type::SELL, 2, 3,
-                                         4, {"tag1", "tag2", "tag3"}, "comment");
+const auto& tr1 =
+    TransactionPool::TransactionFactory(inv::util::GetTodayDate(), inv::Symbol("tsla"), Transaction::Type::SELL, 2, 3,
+                                        4, Transaction::Tags{"tag1", "tag2", "tag3"}, "comment");
 
-TEST(Transaction, Serialize)
+TEST(Transaction, Serialization)
 {
-  const auto [json, ec] = basic_sell_transaction.Serialize();
+  // Serialize
+  const auto [json, ec] = tr1.Serialize();
   ASSERT_EQ(ec, iex::ErrorCode());
 
-  Transaction tr2;
-  tr2.Deserialize(json);
+  // Deserialize
+  const auto& tr2 = TransactionPool::TransactionFactory(json);
 
-  EXPECT_EQ(basic_sell_transaction, tr2);
+  EXPECT_TRUE(tr1.MemberwiseEquals(tr2));
+}
+
+TEST(Transaction, UniqueID)
+{
+  const auto [json, ec] = tr1.Serialize();
+  ASSERT_EQ(ec, iex::ErrorCode());
+
+  std::size_t num_transactions = 100;
+  std::unordered_set<Transaction::ID> ids;
+  for (std::size_t i = 0; i < num_transactions; ++i)
+  {
+    ids.insert(TransactionPool::TransactionFactory(json).id);
+  }
+
+  EXPECT_EQ(num_transactions, ids.size());
+}
+
+TEST(Transaction, Find)
+{
+  const auto [json, ec] = tr1.Serialize();
+  ASSERT_EQ(ec, iex::ErrorCode());
+
+  std::size_t num_transactions = 100;
+  std::unordered_set<Transaction::ID> ids;
+  for (std::size_t i = 0; i < num_transactions; ++i)
+  {
+    ids.insert(TransactionPool::TransactionFactory(json).id);
+  }
+
+  for (const auto& id : ids)
+  {
+    const auto* ptr = TransactionPool::Find(id);
+    EXPECT_TRUE(ptr);
+    if (ptr)
+    {
+      EXPECT_EQ(id, ptr->id);
+    }
+  }
 }

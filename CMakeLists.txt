@@ -58,6 +58,8 @@ set(exec_sources
         detail/common.h
         detail/transaction.cc
         detail/transaction.h
+        detail/transaction_history.cc
+        detail/transaction_history.h
         detail/utils.h
         widget/base.h
         widget/util.h

@@ -6,30 +6,44 @@
 
 #include "invport/detail/transaction.h"
 
-namespace inv
+namespace inv::detail
 {
 namespace
 {
-constexpr static json::MemberName kJsonIDKey = "id";
-constexpr static json::MemberName kJsonDateKey = "date";
-constexpr static json::MemberName kJsonSymbolKey = "symbol";
-constexpr static json::MemberName kJsonTypeKey = "type";
-constexpr static json::MemberName kJsonPriceKey = "price";
-constexpr static json::MemberName kJsonQuantityKey = "quantity";
-constexpr static json::MemberName kJsonFeeKey = "fee";
-constexpr static json::MemberName kJsonTagsKey = "tags";
-constexpr static json::MemberName kJsonCommentKey = "comment";
+constexpr json::MemberName kJsonDateKey = "date";
+constexpr json::MemberName kJsonSymbolKey = "symbol";
+constexpr json::MemberName kJsonTypeKey = "type";
+constexpr json::MemberName kJsonPriceKey = "price";
+constexpr json::MemberName kJsonQuantityKey = "quantity";
+constexpr json::MemberName kJsonFeeKey = "fee";
+constexpr json::MemberName kJsonTagsKey = "tags";
+constexpr json::MemberName kJsonCommentKey = "comment";
 
 constexpr const char* const kBuyStr = "Buy";
 constexpr const char* const kSellStr = "Sell";
 }  // namespace
 
-Transaction Transaction::Factory(const json::Json& input_json) {
-  Transaction tr;
+Transaction Transaction::Factory(const ID id, const json::Json& input_json)
+{
+  Transaction tr(id);
   auto ec = tr.Deserialize(input_json);
-  if (ec.Failure())
-    throw std::runtime_error(ErrorCode("Transaction::Factory() failed", std::move(ec)));
+  if (ec.Failure()) throw std::runtime_error(ErrorCode("Transaction::Factory() failed", std::move(ec)));
 
+  return tr;
+}
+
+Transaction Transaction::Factory(Transaction::ID id, Timestamp ts, Symbol s, Transaction::Type t, Price p,
+                                 Transaction::Quantity q, Price f, Transaction::Tags tags, Transaction::Comment c)
+{
+  Transaction tr(id);
+  tr.date = ts;
+  tr.symbol = std::move(s);
+  tr.type = t;
+  tr.price = p;
+  tr.quantity = q;
+  tr.fee = f;
+  tr.tags = std::move(tags);
+  tr.comment = std::move(c);
   return tr;
 }
 
@@ -41,7 +55,6 @@ const char* Transaction::TypeToString(const Transaction::Type t) { return t == B
 
   try
   {
-    json[kJsonIDKey] = id;
     json[kJsonDateKey] = date.count();
     json[kJsonSymbolKey] = symbol.Get();
     json[kJsonTypeKey] = type;
@@ -62,7 +75,6 @@ ErrorCode Transaction::Deserialize(const json::Json& input_json)
 {
   try
   {
-    input_json.find(kJsonIDKey)->get_to(id);
     date = decltype(date)(input_json[kJsonDateKey]);
     symbol = decltype(symbol)(input_json[kJsonSymbolKey]);
     input_json.find(kJsonTypeKey)->get_to(type);
@@ -80,4 +92,10 @@ ErrorCode Transaction::Deserialize(const json::Json& input_json)
   return {};
 }
 
-}  // namespace inv
+bool Transaction::MemberwiseEquals(const Transaction& other) const
+{
+  return date == other.date && symbol == other.symbol && type == other.type && price == other.price &&
+         quantity == other.quantity && fee == other.fee && tags == other.tags && comment == other.comment;
+}
+
+}  // namespace inv::detail
