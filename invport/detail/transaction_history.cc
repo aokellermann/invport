@@ -17,6 +17,25 @@ TransactionHistory TransactionHistory::Factory(const iex::json::Json& input_json
   return th;
 }
 
+[[nodiscard]] iex::SymbolMap<TransactionHistory::Transaction::Quantity> TransactionHistory::GetQuantities() const
+{
+  iex::SymbolMap<Transaction::Quantity> map;
+  for (const auto& [date, transactions] : timeline_)
+  {
+    for (const auto& id : transactions)
+    {
+      const auto* tr_ptr = TransactionPool::Find(id);
+      if (tr_ptr)
+      {
+        const Transaction::Quantity q_delta =
+            tr_ptr->type == Transaction::Type::BUY ? tr_ptr->quantity : -tr_ptr->quantity;
+        map[tr_ptr->symbol] += q_delta;
+      }
+    }
+  }
+  return map;
+}
+
 ValueWithErrorCode<iex::json::Json> TransactionHistory::Serialize() const
 {
   json::Json json = json::Json::array();

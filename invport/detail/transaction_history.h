@@ -54,6 +54,10 @@ class TransactionHistory : public json::JsonBidirectionalSerializable
     }
   }
 
+  friend void Merge(TransactionHistory& lhs, TransactionHistory& rhs) { lhs.timeline_.merge(rhs.timeline_); }
+
+  [[nodiscard]] iex::SymbolMap<Transaction::Quantity> GetQuantities() const;
+
   [[nodiscard]] ValueWithErrorCode<json::Json> Serialize() const override;
 
   ErrorCode Deserialize(const json::Json& input_json) override;
