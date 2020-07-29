@@ -40,19 +40,7 @@ class TransactionHistory : public json::JsonBidirectionalSerializable
     return tr.id;
   }
 
-  void Remove(const TransactionID& id)
-  {
-    if (const auto* tr_ptr = TransactionPool::Find(id); tr_ptr != nullptr)
-    {
-      if (const auto iter = timeline_.find(tr_ptr->date); iter != timeline_.end())
-      {
-        if (iter->second.erase(id) && iter->second.empty())
-        {
-          timeline_.erase(iter);
-        }
-      }
-    }
-  }
+  void Remove(const TransactionID& id);
 
   friend void Merge(TransactionHistory& lhs, TransactionHistory& rhs) { lhs.timeline_.merge(rhs.timeline_); }
 

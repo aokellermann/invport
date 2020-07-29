@@ -17,6 +17,20 @@ TransactionHistory TransactionHistory::Factory(const iex::json::Json& input_json
   return th;
 }
 
+void TransactionHistory::Remove(const TransactionID& id)
+{
+  if (const auto* tr_ptr = TransactionPool::Find(id); tr_ptr != nullptr)
+  {
+    if (const auto iter = timeline_.find(tr_ptr->date); iter != timeline_.end())
+    {
+      if (iter->second.erase(id) && iter->second.empty())
+      {
+        timeline_.erase(iter);
+      }
+    }
+  }
+}
+
 [[nodiscard]] iex::SymbolMap<TransactionHistory::Transaction::Quantity> TransactionHistory::GetQuantities() const
 {
   iex::SymbolMap<Transaction::Quantity> map;
