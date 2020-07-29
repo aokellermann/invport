@@ -29,8 +29,8 @@ class TransactionHistory : public json::JsonBidirectionalSerializable
 
   auto begin() { return timeline_.begin(); }
   auto end() { return timeline_.end(); }
-  const auto begin() const { return timeline_.begin(); }
-  const auto end() const { return timeline_.end(); }
+  [[nodiscard]] auto begin() const { return timeline_.begin(); }
+  [[nodiscard]] auto end() const { return timeline_.end(); }
 
   template <typename... Args>
   TransactionID Add(Args&&... args)
