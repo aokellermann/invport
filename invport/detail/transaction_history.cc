@@ -93,4 +93,19 @@ ErrorCode TransactionHistory::Deserialize(const iex::json::Json& input_json)
 
   return {};
 }
+bool TransactionHistory::MemberwiseEquals(const TransactionHistory& other) const
+{
+  const auto [it1, it2] = std::mismatch(begin(), end(), other.begin(), other.end(), [](const auto& p1, const auto& p2) {
+    if (p1.first != p2.first) return false;
+
+    std::begin(*this);
+
+    const auto [tr_it1, tr_it2] =
+        std::mismatch(p1.second.begin(), p1.second.end(), p2.second.begin(), p2.second.end(),
+                      [](const auto& tr1, const auto& tr2) { return tr1.MemberwiseEquals(tr2); });
+    return tr_it1 == p1.second.end() && tr_it2 == p2.second.end();
+  });
+
+  return it1 == end() && it2 == other.end();
+}
 }  // namespace inv

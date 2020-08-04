@@ -94,7 +94,7 @@ struct Transaction : json::JsonBidirectionalSerializable
   bool operator==(const Transaction& other) const { return id == other.id; }
   bool operator!=(const Transaction& other) const { return !(*this == other); }
 
-  bool MemberwiseEquals(const Transaction& other) const;
+  [[nodiscard]] bool MemberwiseEquals(const Transaction& other) const;
 
   // Ordering operators correspond to the Transaction's date.
   bool operator<(const Transaction& other) const { return date < other.date; }

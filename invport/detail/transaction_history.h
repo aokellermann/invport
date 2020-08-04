@@ -79,6 +79,8 @@ class TransactionHistory : public json::JsonBidirectionalSerializable
 
   friend bool operator!=(const TransactionHistory& lhs, const TransactionHistory& rhs) { return !(lhs == rhs); }
 
+  [[nodiscard]] bool MemberwiseEquals(const TransactionHistory& other) const;
+
  private:
   Timeline timeline_;
 };
