@@ -31,19 +31,21 @@ void TransactionHistory::Remove(const TransactionID& id)
   }
 }
 
-[[nodiscard]] iex::SymbolMap<TransactionHistory::Transaction::Quantity> TransactionHistory::GetQuantities() const
+[[nodiscard]] iex::SymbolMap<TransactionHistory::Totals> TransactionHistory::GetTotals(const Date& start_date,
+                                                                                       const Date& end_date) const
 {
-  iex::SymbolMap<Transaction::Quantity> map;
-  for (const auto& [date, transactions] : timeline_)
+  const auto begin = start_date.count() != 0 ? timeline_.lower_bound(start_date) : timeline_.begin();
+  const auto end = end_date.count() != 0 ? timeline_.upper_bound(end_date) : timeline_.end();
+
+  iex::SymbolMap<TransactionHistory::Totals> map;
+  for (auto iter = begin; iter != end; ++iter)
   {
-    for (const auto& id : transactions)
+    for (const auto& id : iter->second)
     {
       const auto* tr_ptr = TransactionPool::Find(id);
       if (tr_ptr)
       {
-        const Transaction::Quantity q_delta =
-            tr_ptr->type == Transaction::Type::BUY ? tr_ptr->quantity : -tr_ptr->quantity;
-        map[tr_ptr->symbol] += q_delta;
+        map[tr_ptr->symbol] += Totals(*tr_ptr);
       }
     }
   }

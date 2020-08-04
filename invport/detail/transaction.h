@@ -35,6 +35,29 @@ struct Transaction : json::JsonBidirectionalSerializable
     SELL
   };
 
+  struct Totals
+  {
+    Totals() = default;
+    explicit Totals(const Transaction& tr)
+        : spent(tr.type == Transaction::Type::BUY ? tr.price * tr.quantity : -tr.price * tr.quantity),
+          quantity(tr.type == Transaction::Type::BUY ? tr.quantity : -tr.quantity),
+          fees(tr.fee)
+    {
+    }
+
+    inline Totals& operator+=(const Totals& other)
+    {
+      spent += other.spent;
+      quantity += other.quantity;
+      fees += other.fees;
+      return *this;
+    }
+
+    Price spent;
+    Transaction::Quantity quantity;
+    Price fees;
+  };
+
   /**
    * Initializes an empty transaction with an ID number.
    */

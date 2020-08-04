@@ -15,11 +15,15 @@
 
 namespace inv
 {
+/**
+ * Represents a timeline of transactions.
+ */
 class TransactionHistory : public json::JsonBidirectionalSerializable
 {
  public:
   using TransactionID = TransactionPool::TransactionID;
   using Transaction = TransactionPool::Transaction;
+  using Totals = Transaction::Totals;
 
   using Date = util::Date;
   using TransactionSet = std::unordered_set<TransactionID>;
@@ -32,6 +36,11 @@ class TransactionHistory : public json::JsonBidirectionalSerializable
   [[nodiscard]] auto begin() const { return timeline_.begin(); }
   [[nodiscard]] auto end() const { return timeline_.end(); }
 
+  /**
+   * Adds a transaction to the timeline.
+   * @param args Parameter pack of args passed to Transaction::Factory
+   * @return id of new transaction
+   */
   template <typename... Args>
   TransactionID Add(Args&&... args)
   {
@@ -40,11 +49,24 @@ class TransactionHistory : public json::JsonBidirectionalSerializable
     return tr.id;
   }
 
+  /**
+   * Removes a transaction from the timeline.
+   * @param id the id of the transaction to remove
+   */
   void Remove(const TransactionID& id);
 
+  /**
+   * Merges two TransactionHistorys
+   */
   friend void Merge(TransactionHistory& lhs, TransactionHistory& rhs) { lhs.timeline_.merge(rhs.timeline_); }
 
-  [[nodiscard]] iex::SymbolMap<Transaction::Quantity> GetQuantities() const;
+  /**
+   * Gets the total number of shares per symbol until then given date.
+   * @param start_date the starting date, inclusive, or zero, which will evaluate from begin()
+   * @param end_date the stopping date, inclusive, or zero, which will evaluate until end()
+   * @return symbol map Totals
+   */
+  [[nodiscard]] iex::SymbolMap<Totals> GetTotals(const Date& start_date = {}, const Date& end_date = {}) const;
 
   [[nodiscard]] ValueWithErrorCode<json::Json> Serialize() const override;
 

@@ -6,10 +6,19 @@
 
 #pragma once
 
+#include <limits>
+
 #include "invport/detail/common.h"
 
 namespace inv::util
 {
+template <typename T1, typename T2>
+bool FloatingEqual(T1 a, T2 b)
+{
+  const auto difference = std::fabs(a - b);
+  return difference < std::numeric_limits<decltype(difference)>::epsilon();
+}
+
 /**
  * Represents a date, without hour/minute/second etc.
  */
