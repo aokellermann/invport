@@ -6,14 +6,38 @@
 
 #include "transaction_history.h"
 
+#include <spdlog/spdlog.h>
+
 namespace inv
 {
-TransactionHistory TransactionHistory::Factory(const iex::json::Json& input_json)
+TransactionHistory::~TransactionHistory()
 {
-  TransactionHistory th;
-  auto ec = th.Deserialize(input_json);
-  if (ec.Failure()) throw std::runtime_error(ErrorCode("TransactionHistory::Factory() failed", std::move(ec)));
+  try
+  {
+    auto vec = Serialize();
+    if (vec.second.Failure()) throw std::runtime_error(vec.second);
 
+    auto ec = WriteFile(vec.first.dump());
+    if (ec.Failure()) throw std::runtime_error(ec);
+  }
+  catch (const std::exception& e)
+  {
+    spdlog::critical(ErrorCode("TransactionHistory::~TransactionHistory failed", ErrorCode(e.what())));
+  }
+}
+
+TransactionHistory TransactionHistory::Factory(const file::Path& relative_path, file::Directory directory)
+{
+  TransactionHistory th(relative_path, directory);
+  auto vec = th.ReadFile();
+  if (vec.second.Failure())
+    throw std::runtime_error(ErrorCode("TransactionHistory::Factory() failed", std::move(vec.second)));
+
+  if (!vec.first.empty())
+  {
+    auto ec = th.Deserialize(json::Json::parse(vec.first));
+    if (ec.Failure()) throw std::runtime_error(ErrorCode("TransactionHistory::Factory() failed", std::move(ec)));
+  }
   return th;
 }
 
@@ -34,8 +58,8 @@ void TransactionHistory::Remove(const TransactionID& id)
 [[nodiscard]] iex::SymbolMap<TransactionHistory::Totals> TransactionHistory::GetTotals(const Date& start_date,
                                                                                        const Date& end_date) const
 {
-  const auto begin = start_date.count() != 0 ? timeline_.lower_bound(start_date) : timeline_.begin();
-  const auto end = end_date.count() != 0 ? timeline_.upper_bound(end_date) : timeline_.end();
+  const auto begin = !start_date.IsZero() ? timeline_.lower_bound(start_date) : timeline_.begin();
+  const auto end = !end_date.IsZero() ? timeline_.upper_bound(end_date) : timeline_.end();
 
   iex::SymbolMap<TransactionHistory::Totals> map;
   for (auto iter = begin; iter != end; ++iter)
@@ -74,7 +98,6 @@ ValueWithErrorCode<iex::json::Json> TransactionHistory::Serialize() const
     return {json, ErrorCode("TransactionHistory::Serialize() failed", ErrorCode(e.what()))};
   }
 
-  auto str = json.dump();
   return {json, {}};
 }
 ErrorCode TransactionHistory::Deserialize(const iex::json::Json& input_json)
@@ -98,11 +121,10 @@ bool TransactionHistory::MemberwiseEquals(const TransactionHistory& other) const
   const auto [it1, it2] = std::mismatch(begin(), end(), other.begin(), other.end(), [](const auto& p1, const auto& p2) {
     if (p1.first != p2.first) return false;
 
-    std::begin(*this);
-
-    const auto [tr_it1, tr_it2] =
-        std::mismatch(p1.second.begin(), p1.second.end(), p2.second.begin(), p2.second.end(),
-                      [](const auto& tr1, const auto& tr2) { return tr1.MemberwiseEquals(tr2); });
+    const auto [tr_it1, tr_it2] = std::mismatch(
+        p1.second.begin(), p1.second.end(), p2.second.begin(), p2.second.end(), [](const auto& tr1, const auto& tr2) {
+          return TransactionPool::Find(tr1)->MemberwiseEquals(*TransactionPool::Find(tr2));
+        });
     return tr_it1 == p1.second.end() && tr_it2 == p2.second.end();
   });
 

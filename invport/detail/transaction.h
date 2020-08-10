@@ -9,7 +9,7 @@
 #include <forward_list>
 #include <string>
 
-#include "invport/detail/common.h"
+#include "invport/detail/utils.h"
 
 namespace inv
 {
@@ -33,6 +33,19 @@ struct Transaction : json::JsonBidirectionalSerializable
   {
     BUY,
     SELL
+  };
+
+  enum Field
+  {
+    DATE,
+    SYMBOL,
+    TYPE,
+    PRICE,
+    QUANTITY,
+    FEE,
+    TAGS,
+    COMMENT,
+    NUM_FIELDS
   };
 
   struct Totals
@@ -61,7 +74,7 @@ struct Transaction : json::JsonBidirectionalSerializable
   /**
    * Initializes an empty transaction with an ID number.
    */
-  explicit Transaction(ID id) : id(id) {}
+  explicit Transaction(ID tr_id) : id(tr_id), date(0) {}
 
   /**
    * Transaction factory method to deserialize from JSON data.
@@ -76,7 +89,7 @@ struct Transaction : json::JsonBidirectionalSerializable
    * @param id unique ID
    * @return new Transaction
    */
-  static Transaction Factory(ID id, Timestamp ts, Symbol s, Type t, Price p, Quantity q, Price f, Tags tags = {},
+  static Transaction Factory(ID id, Date d, Symbol s, Type t, Price p, Quantity q, Price f, Tags tags = {},
                              Comment c = {});
 
   /**
@@ -98,7 +111,7 @@ struct Transaction : json::JsonBidirectionalSerializable
 
   // Ordering operators correspond to the Transaction's date.
   bool operator<(const Transaction& other) const { return date < other.date; }
-  bool operator>(const Transaction& other) const { return *this < other; }
+  bool operator>(const Transaction& other) const { return date > other.date; }
   bool operator<=(const Transaction& other) const { return !(*this > other); }
   bool operator>=(const Transaction& other) const { return !(*this < other); }
 
@@ -109,7 +122,7 @@ struct Transaction : json::JsonBidirectionalSerializable
   /**
    * The date of the transaction
    */
-  Timestamp date;
+  Date date;
   /**
    * The transaction's associated symbol
    */

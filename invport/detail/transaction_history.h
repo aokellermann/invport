@@ -10,6 +10,7 @@
 #include <unordered_map>
 
 #include "invport/detail/common.h"
+#include "invport/detail/file_serializable.h"
 #include "invport/detail/transaction.h"
 #include "invport/detail/utils.h"
 
@@ -18,18 +19,30 @@ namespace inv
 /**
  * Represents a timeline of transactions.
  */
-class TransactionHistory : public json::JsonBidirectionalSerializable
+class TransactionHistory : public json::JsonBidirectionalSerializable, public file::FileIoBase
 {
  public:
   using TransactionID = TransactionPool::TransactionID;
   using Transaction = TransactionPool::Transaction;
   using Totals = Transaction::Totals;
 
-  using Date = util::Date;
   using TransactionSet = std::unordered_set<TransactionID>;
   using Timeline = std::map<Date, TransactionSet>;
 
-  static TransactionHistory Factory(const json::Json& input_json);
+ private:
+  explicit TransactionHistory(const file::Path& relative_path = "transaction_history",
+                              file::Directory directory = file::HOME)
+      : file::FileIoBase(relative_path, directory)
+  {
+  }
+
+ public:
+  TransactionHistory() = delete;
+
+  ~TransactionHistory() override;
+
+  static TransactionHistory Factory(const file::Path& relative_path = "transaction_history",
+                                    file::Directory directory = file::HOME);
 
   auto begin() { return timeline_.begin(); }
   auto end() { return timeline_.end(); }
@@ -66,11 +79,12 @@ class TransactionHistory : public json::JsonBidirectionalSerializable
    * @param end_date the stopping date, inclusive, or zero, which will evaluate until end()
    * @return symbol map Totals
    */
-  [[nodiscard]] iex::SymbolMap<Totals> GetTotals(const Date& start_date = {}, const Date& end_date = {}) const;
+  [[nodiscard]] iex::SymbolMap<Totals> GetTotals(const Date& start_date = Date::Zero(),
+                                                 const Date& end_date = Date::Zero()) const;
 
-  [[nodiscard]] ValueWithErrorCode<json::Json> Serialize() const override;
+  [[nodiscard]] ValueWithErrorCode<json::Json> Serialize() const final;
 
-  ErrorCode Deserialize(const json::Json& input_json) override;
+  ErrorCode Deserialize(const json::Json& input_json) final;
 
   friend bool operator==(const TransactionHistory& lhs, const TransactionHistory& rhs)
   {

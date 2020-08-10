@@ -60,11 +60,14 @@ set(exec_sources
         detail/transaction.h
         detail/transaction_history.cc
         detail/transaction_history.h
+        detail/utils.cc
         detail/utils.h
         widget/base.h
         widget/util.h
         widget/key_selector.cc
         widget/key_selector.h
+        widget/transaction_creator.cc
+        widget/transaction_creator.h
         )
 
 # Specify source directory.

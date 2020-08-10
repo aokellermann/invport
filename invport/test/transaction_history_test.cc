@@ -16,9 +16,9 @@ using Transaction = TransactionHistory::Transaction;
 
 TEST(TransactionHistory, Serialize)
 {
-  const auto ts1 = inv::Timestamp(50);
-  const auto ts2 = inv::Timestamp(100);
-  const auto ts3 = inv::Timestamp(25);
+  const auto ts1 = inv::Date(50);
+  const auto ts2 = inv::Date(100);
+  const auto ts3 = inv::Date(25);
   Transaction::Tags tags = {"tag1", "tag2", "tag3"};
 
   TransactionHistory th;
@@ -49,11 +49,11 @@ TEST(TransactionHistory, Serialize)
 
 TEST(TransactionHistory, GetQuantities)
 {
-  const auto ts1 = inv::Timestamp(25);
-  const auto ts2 = inv::Timestamp(50);
-  const auto ts3 = inv::Timestamp(100);
-  const auto ts4 = inv::Timestamp(150);
-  const auto ts5 = inv::Timestamp(200);
+  const auto ts1 = inv::Date(14, 7, 2015);
+  const auto ts2 = inv::Date(6, 8, 2015);
+  const auto ts3 = inv::Date(2, 12, 2017);
+  const auto ts4 = inv::Date(30, 1, 2018);
+  const auto ts5 = inv::Date(6, 8, 2020);
   Transaction::Tags tags = {"tag1", "tag2", "tag3"};
 
   TransactionHistory th;

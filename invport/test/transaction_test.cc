@@ -15,7 +15,7 @@ using TransactionPool = inv::TransactionPool;
 using Transaction = TransactionPool::Transaction;
 
 const auto& tr1 =
-    TransactionPool::TransactionFactory(inv::util::GetTodayDate(), inv::Symbol("tsla"), Transaction::Type::SELL, 2, 3,
+    TransactionPool::TransactionFactory(inv::Date::Today(), inv::Symbol("tsla"), Transaction::Type::SELL, 2, 3,
                                         4, Transaction::Tags{"tag1", "tag2", "tag3"}, "comment");
 
 TEST(Transaction, Serialization)

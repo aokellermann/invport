@@ -10,7 +10,7 @@
 
 #include "invport/detail/common.h"
 
-namespace inv::util
+namespace inv
 {
 template <typename T1, typename T2>
 bool FloatingEqual(T1 a, T2 b)
@@ -19,51 +19,80 @@ bool FloatingEqual(T1 a, T2 b)
   return difference < std::numeric_limits<decltype(difference)>::epsilon();
 }
 
+// region Date
+
 /**
  * Represents a date, without hour/minute/second etc.
  */
-using Date = Timestamp;
-
-/**
- * Gets the date of the given time.
- * @param time unix time in seconds
- * @return truncated date
- */
-inline Date ToDate(const std::time_t& time)
+struct Date
 {
-  auto* const tm_now = std::gmtime(&time);
-  tm_now->tm_sec = 0;
-  tm_now->tm_min = 0;
-  tm_now->tm_hour = 0;
-  const std::time_t seconds_time = std::mktime(tm_now) - timezone;
-  return std::chrono::duration_cast<Timestamp>(std::chrono::seconds(seconds_time));
-}
+  using PrimitiveType = uint16_t;
 
-/**
- * Gets today's date.
- * @return truncated date
- */
-inline Date GetTodayDate()
-{
-  const auto time_now = std::time(nullptr);
-  return ToDate(time_now);
-}
+  static const Date kZero;
+  static constexpr const uint8_t kDayBitLength = 5;
+  static constexpr const uint8_t kMonthBitLength = 4;
+  static constexpr const uint8_t kYearBitLength = 7;
+  static constexpr const uint16_t kYearOffset = 1970;
 
-/**
- * Gets the date from human-readable date format.
- * @param year YYYY
- * @param month MM [1,12]
- * @param day DD [1,31]
- * @return Date
- */
-inline Date GetDate(int year, int month, int day)
-{
-  const std::time_t now = std::time(nullptr);
-  std::tm* tm = std::gmtime(&now);
-  tm->tm_year = year - 1900;
-  tm->tm_mon = month - 1;
-  tm->tm_mday = day;
-  return ToDate(std::mktime(tm));
-}
+  constexpr Date() noexcept : day(0), month(0), year(0) {}
 
-}  // namespace inv::util
+  explicit Date(const json::Json& json) : Date(json.get<PrimitiveType>()) {}
+
+  explicit Date(const std::string& str);
+
+  explicit Date(const PrimitiveType pt) { std::memcpy(this, &pt, sizeof(PrimitiveType)); }
+
+  Date(unsigned d, unsigned m, unsigned y) : Date(std::to_string(d) + '/' + std::to_string(m) + '/' + std::to_string(y))
+  {
+  }
+
+  [[nodiscard]] PrimitiveType ToPrimitive() const
+  {
+    if (IsZero()) return 0;
+    PrimitiveType pt;
+    memcpy(&pt, this, sizeof(PrimitiveType));
+    return pt;
+  }
+
+  [[nodiscard]] std::string ToString() const
+  {
+    if (IsZero()) throw std::runtime_error("Date is Zero");
+    return std::to_string(day) + '/' + std::to_string(month) + '/' +
+           std::to_string(kYearOffset + static_cast<int>(year));
+  }
+
+  [[nodiscard]] bool IsZero() const { return day == 0U || month == 0U; }
+
+  static const Date& Zero() { return kZero; }
+
+  static Date Today()
+  {
+    const auto time_now = std::time(nullptr);
+    const auto* const tm_now = std::gmtime(&time_now);
+    return Date(tm_now->tm_mday, tm_now->tm_mon + 1, tm_now->tm_year + 1900);
+  }
+
+  bool operator==(const Date& other) const { return ToPrimitive() == other.ToPrimitive(); }
+  bool operator!=(const Date& other) const { return !(*this == other); }
+  bool operator<(const Date& other) const { return ToPrimitive() < other.ToPrimitive(); }
+  bool operator>(const Date& other) const { return ToPrimitive() > other.ToPrimitive(); }
+  bool operator<=(const Date& other) const { return !(*this > other); }
+  bool operator>=(const Date& other) const { return !(*this < other); }
+
+  /**
+   * Day of month: [1,31]
+   */
+  unsigned day : kDayBitLength;
+  /**
+   * Month of year: [1,12]
+   */
+  unsigned month : kMonthBitLength;
+  /**
+   * Years since 1970 [0,127]
+   */
+  unsigned year : kYearBitLength;
+};
+
+// endregion Date
+
+}  // namespace inv

@@ -25,6 +25,7 @@ constexpr const char* const kSellStr = "Sell";
 
 Transaction Transaction::Factory(const ID id, const json::Json& input_json)
 {
+  
   Transaction tr(id);
   auto ec = tr.Deserialize(input_json);
   if (ec.Failure()) throw std::runtime_error(ErrorCode("Transaction::Factory() failed", std::move(ec)));
@@ -32,11 +33,11 @@ Transaction Transaction::Factory(const ID id, const json::Json& input_json)
   return tr;
 }
 
-Transaction Transaction::Factory(Transaction::ID id, Timestamp ts, Symbol s, Transaction::Type t, Price p,
+Transaction Transaction::Factory(Transaction::ID id, Date d, Symbol s, Transaction::Type t, Price p,
                                  Transaction::Quantity q, Price f, Transaction::Tags tags, Transaction::Comment c)
 {
   Transaction tr(id);
-  tr.date = ts;
+  tr.date = d;
   tr.symbol = std::move(s);
   tr.type = t;
   tr.price = p;
@@ -55,7 +56,7 @@ const char* Transaction::TypeToString(const Transaction::Type t) { return t == B
 
   try
   {
-    json[kJsonDateKey] = date.count();
+    json[kJsonDateKey] = date.ToPrimitive();
     json[kJsonSymbolKey] = symbol.Get();
     json[kJsonTypeKey] = type;
     json[kJsonPriceKey] = price;

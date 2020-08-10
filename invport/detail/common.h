@@ -4,11 +4,12 @@
  * @copyright 2020 Antony Kellermann
  */
 
+#pragma once
+
 #include <iex/detail/common.h>
 #include <iex/detail/json_serializer.h>
 #include <iex/iex.h>
-
-#pragma once
+#include <spdlog/spdlog.h>
 
 namespace inv
 {

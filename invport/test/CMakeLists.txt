@@ -7,6 +7,7 @@ add_executable(${test_exec}
         keychain_test.cc
         transaction_test.cc
         transaction_history_test.cc
+        utils_test.cc
         )
 
 target_link_libraries(${test_exec} ${_link_libraries})
