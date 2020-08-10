@@ -58,7 +58,8 @@ void TransactionCreator::SignalActivate(int response_id)
     {
       auto begin = tok.find_first_not_of(" \f\n\r\t\v");
       auto end = tok.find_last_not_of(" \f\n\r\t\v");
-      tags.emplace_front(tok.substr(begin, end - begin));
+      if (begin == std::string::npos) begin = 0;
+      tags.emplace_front(tok.substr(begin, end - begin + 1));
     }
 
     Transaction::Comment comment(GetWidget<Gtk::Entry>(builder, kKeyEntryNames[Field::COMMENT]).get_text());
