@@ -82,6 +82,10 @@ class TransactionHistory : public json::JsonBidirectionalSerializable, public fi
   [[nodiscard]] iex::SymbolMap<Totals> GetTotals(const Date& start_date = Date::Zero(),
                                                  const Date& end_date = Date::Zero()) const;
 
+  [[nodiscard]] TransactionSet GetAssociatedTransactions(const Transaction::Tag& tag);
+
+  [[nodiscard]] std::unordered_map<Transaction::Tag, TransactionSet> GetAssociatedTransactions();
+
   [[nodiscard]] ValueWithErrorCode<json::Json> Serialize() const final;
 
   ErrorCode Deserialize(const json::Json& input_json) final;

@@ -26,7 +26,7 @@ struct Transaction : json::JsonBidirectionalSerializable
   using ID = uint64_t;
   using Quantity = double;
   using Tag = std::string;
-  using Tags = std::forward_list<Tag>;
+  using Tags = std::unordered_set<Tag>;
   using Comment = std::string;
 
   enum Type

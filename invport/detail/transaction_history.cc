@@ -76,6 +76,34 @@ void TransactionHistory::Remove(const TransactionID& id)
   return map;
 }
 
+TransactionHistory::TransactionSet TransactionHistory::GetAssociatedTransactions(
+    const TransactionHistory::Transaction::Tag& tag)
+{
+  TransactionHistory::TransactionSet set;
+  for (const auto& [date, transactions] : timeline_)
+  {
+    for (const auto& id : transactions)
+    {
+      if (TransactionPool::Find(id)->tags.count(tag)) set.insert(id);
+    }
+  }
+  return set;
+}
+
+std::unordered_map<TransactionHistory::Transaction::Tag, TransactionHistory::TransactionSet>
+TransactionHistory::GetAssociatedTransactions()
+{
+  std::unordered_map<TransactionHistory::Transaction::Tag, TransactionHistory::TransactionSet> map;
+  for (const auto& [date, transactions] : timeline_)
+  {
+    for (const auto& id : transactions)
+    {
+      for (const auto& tag : TransactionPool::Find(id)->tags) map[tag].insert(id);
+    }
+  }
+  return map;
+}
+
 ValueWithErrorCode<iex::json::Json> TransactionHistory::Serialize() const
 {
   json::Json json = json::Json::array();
