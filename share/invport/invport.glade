@@ -450,18 +450,4 @@ Author: Antony Kellermann
       <placeholder/>
     </child>
   </object>
-  <object class="GtkListStore" id="transaction_type_list_store">
-    <columns>
-      <!-- column-name Type -->
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0" translatable="yes">Buy</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Sell</col>
-      </row>
-    </data>
-  </object>
 </interface>
