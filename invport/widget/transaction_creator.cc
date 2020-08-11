@@ -6,6 +6,8 @@
 
 #include "invport/widget/transaction_creator.h"
 
+#include <spdlog/spdlog.h>
+
 #include "invport/detail/transaction.h"
 #include "invport/widget/util.h"
 

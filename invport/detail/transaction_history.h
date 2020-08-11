@@ -37,8 +37,6 @@ class TransactionHistory : public json::JsonBidirectionalSerializable, public fi
   }
 
  public:
-  TransactionHistory() = delete;
-
   ~TransactionHistory() override;
 
   static TransactionHistory Factory(const file::Path& relative_path = "transaction_history",

@@ -4,7 +4,7 @@
  * @copyright 2020 Antony Kellermann
  */
 
-#include "main_window.h"
+#include "invport/widget/main_window.h"
 
 namespace inv::widget
 {

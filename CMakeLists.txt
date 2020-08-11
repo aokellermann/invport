@@ -123,6 +123,8 @@ if (BUILD_TESTING)
             $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
             )
 
+    target_link_libraries(invport_lib ${GTKMM_LIBRARIES} iex::iex spdlog::spdlog)
+
     enable_testing()
     set(INSTALL_GTEST OFF)
     set(CMAKE_POLICY_DEFAULT_CMP0077 NEW) # Propagate INSTALL_GTEST=OFF to subproject
