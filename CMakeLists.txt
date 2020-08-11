@@ -62,6 +62,8 @@ set(exec_sources
         detail/transaction_history.h
         detail/utils.cc
         detail/utils.h
+        detail/vanguard.cc
+        detail/vanguard.h
         widget/base.h
         widget/util.h
         widget/key_selector.cc

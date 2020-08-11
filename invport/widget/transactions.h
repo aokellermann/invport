@@ -36,6 +36,10 @@ class Transactions : public Gtk::Paned, private WidgetBase
         .signal_clicked()
         .connect(sigc::mem_fun(*this, &Transactions::RemoveTransactionButtonSignalActivate));
 
+    GetWidget<Gtk::FileChooserButton>(bldr, "vanguard_file_chooser_button")
+        .signal_file_set()
+        .connect(sigc::mem_fun(*this, &Transactions::VanguardFileChooserButtonSignalFileSet));
+
     transaction_creator_.signal_hide().connect(sigc::mem_fun(*this, &Transactions::RefreshAndFlush));
 
     Refresh(false);
@@ -46,6 +50,8 @@ class Transactions : public Gtk::Paned, private WidgetBase
   void AddTransactionButtonSignalActivate();
 
   void RemoveTransactionButtonSignalActivate();
+
+  void VanguardFileChooserButtonSignalFileSet();
 
   inline void RefreshAndFlush() { Refresh(true); }
 

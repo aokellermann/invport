@@ -44,7 +44,7 @@ void TransactionCreator::SignalActivate(int response_id)
 
   try
   {
-    Date date(GetWidget<Gtk::Entry>(builder, kKeyEntryNames[Field::DATE]).get_text());
+    Date date(GetWidget<Gtk::Entry>(builder, kKeyEntryNames[Field::DATE]).get_text(), Date::Format::MMDDYYYY);
 
     Symbol symbol(GetWidget<Gtk::Entry>(builder, kKeyEntryNames[Field::SYMBOL]).get_text());
 

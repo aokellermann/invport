@@ -36,8 +36,14 @@ class TransactionHistory : public json::JsonBidirectionalSerializable, public fi
   {
   }
 
+  struct TempTag
+  {
+  };
+
  public:
-  ~TransactionHistory() override;
+  static const TempTag kTempTag;
+
+  explicit TransactionHistory(const TempTag&) : file::FileIoBase(std::to_string(std::rand()), file::Directory::TEMP) {}
 
   static TransactionHistory Factory(const file::Path& relative_path = "transaction_history",
                                     file::Directory directory = file::HOME);

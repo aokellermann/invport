@@ -25,6 +25,12 @@ void Transactions::RemoveTransactionButtonSignalActivate()
     }
   }
 }
+
+void Transactions::VanguardFileChooserButtonSignalFileSet()
+{
+
+}
+
 void Transactions::Refresh(bool flush)
 {
   transaction_history_.ToTreeStore(transactions_list_store_);

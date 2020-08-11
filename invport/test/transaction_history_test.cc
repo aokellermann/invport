@@ -21,7 +21,7 @@ TEST(TransactionHistory, Serialize)
   const auto ts3 = inv::Date(25);
   Transaction::Tags tags = {"tag1", "tag2", "tag3"};
 
-  TransactionHistory th = TransactionHistory::Factory(std::to_string(std::rand()) + "th", inv::file::Directory::TEMP);
+  TransactionHistory th(TransactionHistory::kTempTag);
   th.Add(ts1, iex::Symbol("tsla"), Transaction::Type::BUY, 2, 3, 4, tags, "1");
   th.Add(ts2, iex::Symbol("aapl"), Transaction::Type::BUY, 5, 6, 7, tags, "2");
   th.Add(ts2, iex::Symbol("amd"), Transaction::Type::BUY, 8, 9, 10, tags, "3");
@@ -32,7 +32,7 @@ TEST(TransactionHistory, Serialize)
   const auto [json, ec] = th.Serialize();
   ASSERT_EQ(ec, iex::ErrorCode());
 
-  TransactionHistory th2 = TransactionHistory::Factory(std::to_string(std::rand()) + "th", inv::file::Directory::TEMP);
+  TransactionHistory th2(TransactionHistory::kTempTag);
   th2.Deserialize(json);
 
   auto iter1 = th.begin();

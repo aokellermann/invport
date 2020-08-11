@@ -10,8 +10,6 @@
 
 namespace inv
 {
-TransactionHistory::~TransactionHistory() { Flush(); }
-
 TransactionHistory TransactionHistory::Factory(const file::Path& relative_path, file::Directory directory)
 {
   TransactionHistory th(relative_path, directory);

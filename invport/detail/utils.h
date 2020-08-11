@@ -32,10 +32,27 @@ std::string ToString(T num)
     if (!str.empty() && str[str.size() - 1] == '.') str.pop_back();
     return str;
   }
-  else
+  else if constexpr (std::is_integral_v<T>)
   {
     return std::to_string(num);
   }
+}
+
+template <typename T>
+T ToNum(const std::string& str, int base = 10)
+{
+  if constexpr (std::is_same_v<T, float>) return std::strtof(str.c_str(), nullptr);
+  if constexpr (std::is_same_v<T, double>) return std::strtod(str.c_str(), nullptr);
+  if constexpr (std::is_same_v<T, long double>) return std::strtold(str.c_str(), nullptr);
+
+  if constexpr (std::is_same_v<T, long>)  // NOLINT
+    return std::strtol(str.c_str(), nullptr, base);
+  if constexpr (std::is_same_v<T, long long>)  // NOLINT
+    return std::strtoll(str.c_str(), nullptr, base);
+  if constexpr (std::is_same_v<T, unsigned long>)  // NOLINT
+    return std::strtoul(str.c_str(), nullptr, base);
+  if constexpr (std::is_same_v<T, unsigned long long>)  // NOLINT
+    return std::strtoull(str.c_str(), nullptr, base);
 }
 
 template <typename InputIt>
@@ -52,6 +69,8 @@ std::string Join(InputIt begin, InputIt end, const std::string& delimiter)
 std::stringstream Read(const std::filesystem::path& path);
 
 std::vector<std::string> Split(std::stringstream sstr);
+
+inline std::vector<std::string> Split(const std::string& str) { return Split(std::stringstream(str)); }
 
 // region Date
 
