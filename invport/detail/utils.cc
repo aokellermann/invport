@@ -6,11 +6,29 @@
 
 #include "invport/detail/utils.h"
 
+#include <fstream>
+
 namespace inv
 {
 const Date Date::kZero;
 
-Date::Date(const std::string& str)
+std::stringstream Read(const std::filesystem::path& path)
+{
+  std::ifstream ifstream(path);
+  std::stringstream sstr;
+  sstr << ifstream.rdbuf();
+  return sstr;
+}
+
+std::vector<std::string> Split(std::stringstream sstr)
+{
+  std::vector<std::string> lines;
+  std::string line;
+  while (std::getline(sstr, line)) lines.emplace_back(std::move(line));
+  return lines;
+}
+
+Date::Date(const std::string& str, Format format)
 {
   std::vector<std::size_t> delimiter_indices;
   for (size_t i = 0; i < str.size(); ++i)
@@ -23,16 +41,20 @@ Date::Date(const std::string& str)
       str.substr(delimiter_indices[0] + 1, delimiter_indices[0] + 1 - delimiter_indices[1]);
   const std::string year_string = str.substr(delimiter_indices[1] + 1);
 
-  const auto lday = std::strtoul(day_string.c_str(), nullptr, 10);
-  const auto lmonth = std::strtoul(month_string.c_str(), nullptr, 10);
-  const auto lyear = std::strtoul(year_string.c_str(), nullptr, 10) - kYearOffset;
+  const auto first = std::strtoul(day_string.c_str(), nullptr, 10);
+  const auto second = std::strtoul(month_string.c_str(), nullptr, 10);
+  const auto third = std::strtoul(year_string.c_str(), nullptr, 10) - kYearOffset;
 
-  if (!(lday >= 1 && lday <= 31)) throw std::runtime_error("Invalid day of month");
-  if (!(lmonth >= 1 && lmonth <= 12)) throw std::runtime_error("Invalid month of year");
-  if (lyear >= std::pow(2, 7)) throw std::runtime_error("Invalid year");
+  const auto& day_l = format == DDMMYYYY ? first : second;
+  const auto& month_l = format == DDMMYYYY ? second : first;
+  const auto& year_l = third;
 
-  day = lday;
-  month = lmonth;
-  year = lyear;
+  if (!(day_l >= kMinDay && day_l <= kMaxDay)) throw std::runtime_error("Invalid day of month");
+  if (!(month_l >= kMinMonth && month_l <= kMaxMonth)) throw std::runtime_error("Invalid month of year");
+  if (year_l >= kMaxYear) throw std::runtime_error("Invalid year");
+
+  day = day_l;
+  month = month_l;
+  year = year_l;
 }
 }  // namespace inv

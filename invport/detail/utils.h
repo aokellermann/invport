@@ -6,7 +6,9 @@
 
 #pragma once
 
+#include <filesystem>
 #include <limits>
+#include <sstream>
 #include <type_traits>
 
 #include "invport/detail/common.h"
@@ -21,18 +23,19 @@ bool FloatingEqual(T1 a, T2 b)
 }
 
 template <typename T>
-std::enable_if_t<std::is_floating_point_v<T>, std::string> ToString(T num)
+std::string ToString(T num)
 {
-  std::string str = std::to_string(num);
-  str.erase(str.find_last_not_of('0') + 1, std::string::npos);
-  if (!str.empty() && str[str.size() - 1] == '.') str.pop_back();
-  return str;
-}
-
-template <typename T>
-std::enable_if_t<std::is_integral_v<T>, std::string> ToString(T num)
-{
-  return std::to_string(num);
+  if constexpr (std::is_floating_point_v<T>)
+  {
+    std::string str = std::to_string(num);
+    str.erase(str.find_last_not_of('0') + 1, std::string::npos);
+    if (!str.empty() && str[str.size() - 1] == '.') str.pop_back();
+    return str;
+  }
+  else
+  {
+    return std::to_string(num);
+  }
 }
 
 template <typename InputIt>
@@ -45,6 +48,10 @@ std::string Join(InputIt begin, InputIt end, const std::string& delimiter)
 
   return str;
 }
+
+std::stringstream Read(const std::filesystem::path& path);
+
+std::vector<std::string> Split(std::stringstream sstr);
 
 // region Date
 
@@ -60,12 +67,24 @@ struct Date
   static constexpr const uint8_t kMonthBitLength = 4;
   static constexpr const uint8_t kYearBitLength = 7;
   static constexpr const uint16_t kYearOffset = 1970;
+  static constexpr const uint8_t kMinDay = 1;
+  static constexpr const uint8_t kMaxDay = 31;
+  static constexpr const uint8_t kMinMonth = 1;
+  static constexpr const uint8_t kMaxMonth = 12;
+  static constexpr const uint8_t kMinYear = 0;
+  static constexpr const uint8_t kMaxYear = 127;
+
+  enum Format
+  {
+    DDMMYYYY,
+    MMDDYYYY,
+  };
 
   constexpr Date() noexcept : day(0), month(0), year(0) {}
 
   explicit Date(const json::Json& json) : Date(json.get<PrimitiveType>()) {}
 
-  explicit Date(const std::string& str);
+  explicit Date(const std::string& str, Format format = DDMMYYYY);
 
   explicit Date(const PrimitiveType pt) { std::memcpy(this, &pt, sizeof(PrimitiveType)); }
 
