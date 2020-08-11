@@ -27,19 +27,19 @@ TransactionHistory TransactionHistory::Factory(const file::Path& relative_path, 
   return th;
 }
 
-void TransactionHistory::ToTreeStore(Gtk::TreeStore& store) const
+void TransactionHistory::ToTreeStore(Gtk::TreeStore& tree) const
 {
-  store.clear();
+  tree.clear();
 
   for (const auto& [date, transactions] : timeline_)
   {
     if (!transactions.empty())
     {
-      Gtk::TreeRow date_row = *store.append();
+      Gtk::TreeRow date_row = *tree.append();
       date_row.set_value(Transaction::Field::DATE, date.ToString());
       for (const auto& id : transactions)
       {
-        Gtk::TreeRow tr_row = *store.append(date_row.children());
+        Gtk::TreeRow tr_row = *tree.append(date_row.children());
         TransactionPool::Find(id)->ToTreeRow(tr_row);
       }
     }

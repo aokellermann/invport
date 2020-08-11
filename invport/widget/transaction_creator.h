@@ -8,8 +8,8 @@
 
 #include <gtkmm.h>
 
-#include "invport/detail/transaction_history.h"
 #include "invport/detail/common.h"
+#include "invport/detail/transaction_history.h"
 #include "invport/widget/base.h"
 
 namespace inv::widget

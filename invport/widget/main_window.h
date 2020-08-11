@@ -9,9 +9,9 @@
 #include <gtkmm.h>
 
 #include "invport/detail/common.h"
+#include "invport/detail/transaction_history.h"
 #include "invport/widget/base.h"
 #include "invport/widget/transactions.h"
-#include "invport/detail/transaction_history.h"
 
 namespace inv::widget
 {
@@ -19,8 +19,10 @@ class MainWindow : public Gtk::ApplicationWindow, private WidgetBase
 {
  public:
   MainWindow(BaseObjectType* obj, const Glib::RefPtr<Gtk::Builder>& bldr)
-  : Gtk::ApplicationWindow(obj), WidgetBase(bldr), transaction_history_(TransactionHistory::Factory()),
-    transaction_tab_(GetWidgetDerived<Transactions>(bldr, "transactions_tab_paned", transaction_history_))
+      : Gtk::ApplicationWindow(obj),
+        WidgetBase(bldr),
+        transaction_history_(TransactionHistory::Factory()),
+        transaction_tab_(GetWidgetDerived<Transactions>(bldr, "transactions_tab_paned", transaction_history_))
   {
   }
 
@@ -29,4 +31,4 @@ class MainWindow : public Gtk::ApplicationWindow, private WidgetBase
 
   Transactions& transaction_tab_;
 };
-}
+}  // namespace inv::widget

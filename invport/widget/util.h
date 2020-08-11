@@ -16,7 +16,7 @@ namespace inv::widget
 namespace detail
 {
 template <typename T>
-inline void AssertNotNull(const T ptr)
+inline void AssertNotNull(T ptr)
 {
   // This is fatal. builder->get_* prints error message, so we don't have to.
 

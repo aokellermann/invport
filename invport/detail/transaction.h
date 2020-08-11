@@ -6,10 +6,11 @@
 
 #pragma once
 
-#include <forward_list>
-#include <string>
-
 #include <gtkmm.h>
+
+#include <string>
+#include <unordered_set>
+
 #include "invport/detail/utils.h"
 
 namespace inv

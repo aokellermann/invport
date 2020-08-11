@@ -18,10 +18,14 @@ using Field = Transaction::Field;
 
 constexpr const char* const kKeyEntryNames[Field::NUM_FIELDS] = {
     "",  // no entry for id
-    "transaction_creator_dialog_date_entry",     "transaction_creator_dialog_symbol_entry",
-    "transaction_creator_dialog_type_combo_box", "transaction_creator_dialog_price_entry",
-    "transaction_creator_dialog_quantity_entry", "transaction_creator_dialog_fee_entry",
-    "transaction_creator_dialog_tags_entry",     "transaction_creator_dialog_comment_entry",
+    "transaction_creator_dialog_date_entry",
+    "transaction_creator_dialog_symbol_entry",
+    "transaction_creator_dialog_type_combo_box",
+    "transaction_creator_dialog_price_entry",
+    "transaction_creator_dialog_quantity_entry",
+    "transaction_creator_dialog_fee_entry",
+    "transaction_creator_dialog_tags_entry",
+    "transaction_creator_dialog_comment_entry",
 };
 
 constexpr const char* const kErrorLabelName = "transaction_creator_dialog_error_label";

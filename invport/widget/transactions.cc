@@ -9,7 +9,8 @@
 namespace inv::widget
 {
 void Transactions::AddTransactionButtonSignalActivate() { transaction_creator_.show(); }
-void Transactions::RemoveTransactionButtonSignalActivate() {
+void Transactions::RemoveTransactionButtonSignalActivate()
+{
   auto selection = transactions_tree_view_.get_selection();
   if (selection)
   {

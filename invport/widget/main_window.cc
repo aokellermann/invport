@@ -8,5 +8,4 @@
 
 namespace inv::widget
 {
-
 }
