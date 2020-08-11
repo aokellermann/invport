@@ -17,6 +17,7 @@ using Transaction = TransactionHistory::Transaction;
 using Field = Transaction::Field;
 
 constexpr const char* const kKeyEntryNames[Field::NUM_FIELDS] = {
+    "",  // no entry for id
     "transaction_creator_dialog_date_entry",     "transaction_creator_dialog_symbol_entry",
     "transaction_creator_dialog_type_combo_box", "transaction_creator_dialog_price_entry",
     "transaction_creator_dialog_quantity_entry", "transaction_creator_dialog_fee_entry",
@@ -59,7 +60,7 @@ void TransactionCreator::SignalActivate(int response_id)
       auto begin = tok.find_first_not_of(" \f\n\r\t\v");
       auto end = tok.find_last_not_of(" \f\n\r\t\v");
       if (begin == std::string::npos) begin = 0;
-      tags.emplace_front(tok.substr(begin, end - begin + 1));
+      tags.insert(tok.substr(begin, end - begin + 1));
     }
 
     Transaction::Comment comment(GetWidget<Gtk::Entry>(builder, kKeyEntryNames[Field::COMMENT]).get_text());
@@ -68,11 +69,13 @@ void TransactionCreator::SignalActivate(int response_id)
   }
   catch (const std::exception& e)
   {
-    DisplayError("Error:", e.what());
+    DisplayError("Error", e.what());
 
     // Don't hide so that user can try again.
     return;
   }
+
+  spdlog::info("Successfully added new transaction.");
 
   // Only hide if success.
   hide();
@@ -89,5 +92,7 @@ void TransactionCreator::DisplayError(const Glib::ustring& title, const Glib::us
 {
   GetWidget<Gtk::Label>(builder, kErrorLabelName).set_text(title);
   GetWidget<Gtk::Label>(builder, kErrorMessageLabelName).set_text(message);
+
+  spdlog::error(ErrorCode("Failed to add new transaction", ErrorCode(title, ErrorCode(message))));
 }
 }  // namespace inv::widget

@@ -9,9 +9,8 @@
 #include <spdlog/spdlog.h>
 
 #include "invport/detail/keychain.h"
-#include "invport/detail/transaction_history.h"
 #include "invport/widget/key_selector.h"
-#include "invport/widget/transaction_creator.h"
+#include "invport/widget/main_window.h"
 #include "invport/widget/util.h"
 
 int main(int argc, char **argv)
@@ -89,10 +88,7 @@ int main(int argc, char **argv)
   }
 
   spdlog::info("API keys are now populated.");
+  spdlog::info("Opening main window.");
 
-  auto th = inv::TransactionHistory::Factory();
-
-  auto status = application->run(
-      inv::widget::GetWidgetDerived<inv::widget::TransactionCreator>(builder, "transaction_creator_dialog", th));
-  return status;
+  return application->run(inv::widget::GetWidgetDerived<inv::widget::MainWindow>(builder, "main_window"));
 }

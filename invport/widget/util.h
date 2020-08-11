@@ -15,11 +15,12 @@ namespace inv::widget
 {
 namespace detail
 {
-inline void AssertWidgetIsValid(const Gtk::Widget* widget)
+template <typename T>
+inline void AssertNotNull(const T ptr)
 {
-  // This is fatal. builder->get_widget prints error message, so we don't have to.
+  // This is fatal. builder->get_* prints error message, so we don't have to.
 
-  if (!widget)
+  if (!ptr)
   {
     exit(EXIT_FAILURE);
   }
@@ -39,7 +40,7 @@ T& GetWidget(const Glib::RefPtr<Gtk::Builder>& builder, const std::string& name)
 {
   T* widget;
   builder->get_widget(name, widget);
-  detail::AssertWidgetIsValid(widget);
+  detail::AssertNotNull(widget);
   return *widget;
 }
 
@@ -57,8 +58,24 @@ T& GetWidgetDerived(const Glib::RefPtr<Gtk::Builder>& builder, const std::string
 {
   T* widget;
   builder->get_widget_derived(name, widget, args...);
-  detail::AssertWidgetIsValid(widget);
+  detail::AssertNotNull(widget);
   return *widget;
+}
+
+/**
+ * Gets a widget from a builder.
+ * @tparam T The type of widget.
+ * @param builder The builder that contains the widget.
+ * @param name The name of the widget.
+ * @warning Exits if widget is not found.
+ * @return A reference to the widget.
+ */
+template <typename T>
+T& GetObject(const Glib::RefPtr<Gtk::Builder>& builder, const std::string& name)
+{
+  auto object = builder->get_object(name);
+  detail::AssertNotNull(object);
+  return *reinterpret_cast<T*>(object.get());
 }
 
 }  // namespace inv::widget

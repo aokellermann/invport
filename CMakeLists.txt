@@ -68,6 +68,10 @@ set(exec_sources
         widget/key_selector.h
         widget/transaction_creator.cc
         widget/transaction_creator.h
+        widget/main_window.cc
+        widget/main_window.h
+        widget/transactions.cc
+        widget/transactions.h
         )
 
 # Specify source directory.

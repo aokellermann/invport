@@ -44,6 +44,8 @@ class TransactionHistory : public json::JsonBidirectionalSerializable, public fi
   static TransactionHistory Factory(const file::Path& relative_path = "transaction_history",
                                     file::Directory directory = file::HOME);
 
+  void ToTreeStore(Gtk::TreeStore& tree) const;
+
   auto begin() { return timeline_.begin(); }
   auto end() { return timeline_.end(); }
   [[nodiscard]] auto begin() const { return timeline_.begin(); }
@@ -98,6 +100,8 @@ class TransactionHistory : public json::JsonBidirectionalSerializable, public fi
   friend bool operator!=(const TransactionHistory& lhs, const TransactionHistory& rhs) { return !(lhs == rhs); }
 
   [[nodiscard]] bool MemberwiseEquals(const TransactionHistory& other) const;
+
+  void Flush();
 
  private:
   Timeline timeline_;

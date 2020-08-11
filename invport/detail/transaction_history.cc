@@ -10,21 +10,7 @@
 
 namespace inv
 {
-TransactionHistory::~TransactionHistory()
-{
-  try
-  {
-    auto vec = Serialize();
-    if (vec.second.Failure()) throw std::runtime_error(vec.second);
-
-    auto ec = WriteFile(vec.first.dump());
-    if (ec.Failure()) throw std::runtime_error(ec);
-  }
-  catch (const std::exception& e)
-  {
-    spdlog::critical(ErrorCode("TransactionHistory::~TransactionHistory failed", ErrorCode(e.what())));
-  }
-}
+TransactionHistory::~TransactionHistory() { Flush(); }
 
 TransactionHistory TransactionHistory::Factory(const file::Path& relative_path, file::Directory directory)
 {
@@ -39,6 +25,25 @@ TransactionHistory TransactionHistory::Factory(const file::Path& relative_path, 
     if (ec.Failure()) throw std::runtime_error(ErrorCode("TransactionHistory::Factory() failed", std::move(ec)));
   }
   return th;
+}
+
+void TransactionHistory::ToTreeStore(Gtk::TreeStore& store) const
+{
+  store.clear();
+
+  for (const auto& [date, transactions] : timeline_)
+  {
+    if (!transactions.empty())
+    {
+      Gtk::TreeRow date_row = *store.append();
+      date_row.set_value(Transaction::Field::DATE, date.ToString());
+      for (const auto& id : transactions)
+      {
+        Gtk::TreeRow tr_row = *store.append(date_row.children());
+        TransactionPool::Find(id)->ToTreeRow(tr_row);
+      }
+    }
+  }
 }
 
 void TransactionHistory::Remove(const TransactionID& id)
@@ -158,4 +163,21 @@ bool TransactionHistory::MemberwiseEquals(const TransactionHistory& other) const
 
   return it1 == end() && it2 == other.end();
 }
+
+void TransactionHistory::Flush()
+{
+  try
+  {
+    auto vec = Serialize();
+    if (vec.second.Failure()) throw std::runtime_error(vec.second);
+
+    auto ec = WriteFile(vec.first.dump());
+    if (ec.Failure()) throw std::runtime_error(ec);
+  }
+  catch (const std::exception& e)
+  {
+    spdlog::critical(ErrorCode("TransactionHistory::Flush failed", ErrorCode(e.what())));
+  }
+}
+
 }  // namespace inv

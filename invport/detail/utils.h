@@ -7,6 +7,7 @@
 #pragma once
 
 #include <limits>
+#include <type_traits>
 
 #include "invport/detail/common.h"
 
@@ -17,6 +18,32 @@ bool FloatingEqual(T1 a, T2 b)
 {
   const auto difference = std::fabs(a - b);
   return difference < std::numeric_limits<decltype(difference)>::epsilon();
+}
+
+template <typename T>
+std::enable_if_t<std::is_floating_point_v<T>, std::string> ToString(T num)
+{
+  std::string str = std::to_string(num);
+  str.erase(str.find_last_not_of('0') + 1, std::string::npos);
+  if (!str.empty() && str[str.size() - 1] == '.') str.pop_back();
+  return str;
+}
+
+template <typename T>
+std::enable_if_t<std::is_integral_v<T>, std::string> ToString(T num)
+{
+  return std::to_string(num);
+}
+
+template <typename InputIt>
+std::string Join(InputIt begin, InputIt end, const std::string& delimiter)
+{
+  std::string str;
+  for (auto it = begin; it != end; ++it) str.append(*it + delimiter);
+
+  if (begin != end) str.erase(str.size() - 1 - delimiter.size());
+
+  return str;
 }
 
 // region Date

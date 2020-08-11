@@ -29,8 +29,7 @@ Date::Date(const std::string& str)
 
   if (!(lday >= 1 && lday <= 31)) throw std::runtime_error("Invalid day of month");
   if (!(lmonth >= 1 && lmonth <= 12)) throw std::runtime_error("Invalid month of year");
-  if (lyear >= std::pow(2, 7))
-    throw std::runtime_error("Invalid year");
+  if (lyear >= std::pow(2, 7)) throw std::runtime_error("Invalid year");
 
   day = lday;
   month = lmonth;

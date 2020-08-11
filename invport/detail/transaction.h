@@ -9,6 +9,7 @@
 #include <forward_list>
 #include <string>
 
+#include <gtkmm.h>
 #include "invport/detail/utils.h"
 
 namespace inv
@@ -37,6 +38,7 @@ struct Transaction : json::JsonBidirectionalSerializable
 
   enum Field
   {
+    UNIQUE_ID,
     DATE,
     SYMBOL,
     TYPE,
@@ -92,12 +94,7 @@ struct Transaction : json::JsonBidirectionalSerializable
   static Transaction Factory(ID id, Date d, Symbol s, Type t, Price p, Quantity q, Price f, Tags tags = {},
                              Comment c = {});
 
-  /**
-   * Returns a human-readable string containing the given type.
-   * @param t the type
-   * @return a c-str
-   */
-  static const char* TypeToString(Type t);
+  void ToTreeRow(Gtk::TreeRow& row) const;
 
   [[nodiscard]] ValueWithErrorCode<json::Json> Serialize() const override;
 

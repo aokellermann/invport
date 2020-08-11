@@ -21,11 +21,12 @@ constexpr json::MemberName kJsonCommentKey = "comment";
 
 constexpr const char* const kBuyStr = "Buy";
 constexpr const char* const kSellStr = "Sell";
+
+std::string TypeToString(const Transaction::Type t) { return t == Transaction::Type::BUY ? kBuyStr : kSellStr; }
 }  // namespace
 
 Transaction Transaction::Factory(const ID id, const json::Json& input_json)
 {
-  
   Transaction tr(id);
   auto ec = tr.Deserialize(input_json);
   if (ec.Failure()) throw std::runtime_error(ErrorCode("Transaction::Factory() failed", std::move(ec)));
@@ -48,7 +49,18 @@ Transaction Transaction::Factory(Transaction::ID id, Date d, Symbol s, Transacti
   return tr;
 }
 
-const char* Transaction::TypeToString(const Transaction::Type t) { return t == BUY ? kBuyStr : kSellStr; }
+void Transaction::ToTreeRow(Gtk::TreeRow& row) const
+{
+  row.set_value(Field::UNIQUE_ID, ToString(id));
+  row.set_value(Field::DATE, date.ToString());
+  row.set_value(Field::SYMBOL, symbol.Get());
+  row.set_value(Field::TYPE, TypeToString(type));
+  row.set_value(Field::QUANTITY, ToString(quantity));
+  row.set_value(Field::PRICE, ToString(price));
+  row.set_value(Field::FEE, ToString(fee));
+  row.set_value(Field::TAGS, Join(tags.begin(), tags.end(), ", "));
+  row.set_value(Field::COMMENT, comment);
+}
 
 [[nodiscard]] ValueWithErrorCode<json::Json> Transaction::Serialize() const
 {
