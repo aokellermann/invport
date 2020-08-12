@@ -25,6 +25,11 @@ constexpr const char* const kSellStr = "Sell";
 std::string TypeToString(const Transaction::Type t) { return t == Transaction::Type::BUY ? kBuyStr : kSellStr; }
 }  // namespace
 
+Transaction::Tags::Tags(std::initializer_list<Tag> tags)
+{
+  for (const auto& tag : tags) Add(std::move(tag));
+}
+
 Transaction::Tags& Transaction::Tags::operator=(const json::Json& json)
 {
   for (const auto& jstr : json)

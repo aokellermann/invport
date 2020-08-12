@@ -31,6 +31,8 @@ struct Transaction : json::JsonBidirectionalSerializable
   using Tag = std::string;
   struct Tags : std::unordered_map<Tag, std::optional<std::string>>
   {
+    Tags() = default;
+    Tags(std::initializer_list<Tag> tags);
     Tags& operator=(const json::Json& json);
 
     operator std::unordered_set<std::string>() const noexcept;  // NOLINT
