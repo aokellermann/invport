@@ -88,8 +88,7 @@ TransactionHistory Parse(const fs::path& path)
     Transaction::Tags tags;
     tags.Add(kAccountNumberTag, ToString(account_number));
 
-    if (type.value() == Transaction::Type::SELL)
-        quantity = -quantity;
+    if (type.value() == Transaction::Type::SELL) quantity = -quantity;
 
     auto tr_id = th.Add(std::move(trade_date), std::move(symbol), *type, price, quantity, fees, std::move(tags));
     spdlog::info("Parsed new transaction with id {0}", tr_id);

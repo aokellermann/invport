@@ -17,4 +17,4 @@ namespace fs = std::filesystem;
 constexpr const char* const kAccountNumberTag = "acc#";
 
 TransactionHistory Parse(const fs::path& path);
-}
+}  // namespace inv::vanguard
