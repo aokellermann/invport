@@ -119,12 +119,7 @@ struct Date
     return pt;
   }
 
-  [[nodiscard]] std::string ToString() const
-  {
-    if (IsZero()) throw std::runtime_error("Date is Zero");
-    return std::to_string(day) + '/' + std::to_string(month) + '/' +
-           std::to_string(kYearOffset + static_cast<int>(year));
-  }
+  [[nodiscard]] std::string ToString(Format format = Format::DDMMYYYY) const;
 
   [[nodiscard]] bool IsZero() const { return day == 0U || month == 0U; }
 

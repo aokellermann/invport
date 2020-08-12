@@ -8,6 +8,7 @@
 
 #include <gtkmm.h>
 
+#include <optional>
 #include <string>
 #include <unordered_set>
 
@@ -28,7 +29,18 @@ struct Transaction : json::JsonBidirectionalSerializable
   using ID = uint64_t;
   using Quantity = double;
   using Tag = std::string;
-  using Tags = std::unordered_set<Tag>;
+  struct Tags : std::unordered_map<Tag, std::optional<std::string>>
+  {
+    Tags& operator=(const json::Json& json);
+
+    operator std::unordered_set<std::string>() const noexcept;  // NOLINT
+    operator json::Json() const noexcept;                       // NOLINT
+
+    std::unordered_set<Tag> Keys() const;
+
+    inline void Add(Tag tag) { emplace(std::move(tag), std::nullopt); }
+    inline void Add(Tag tag, std::string value) { emplace(std::move(tag), std::move(value)); }
+  };
   using Comment = std::string;
 
   enum Type
@@ -149,6 +161,16 @@ struct Transaction : json::JsonBidirectionalSerializable
    * User-defined comment
    */
   Comment comment;
+};
+
+struct TransactionMemberwiseComparator
+{
+  bool operator()(const Transaction::ID& left, const Transaction::ID& right) const;
+};
+
+struct TransactionMemberwiseHasher
+{
+  std::size_t operator()(const Transaction::ID& id) const;
 };
 }  // namespace detail
 

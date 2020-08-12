@@ -48,10 +48,12 @@ std::optional<Transaction::Type> GetType(const std::smatch& sm)
 
 TransactionHistory Parse(const fs::path& path)
 {
-  spdlog::info("Parsing Vanguard file.");
+  spdlog::info("Parsing Vanguard file with path {0}", path.string());
 
   std::vector<std::string> lines = Split(Read(path));
   TransactionHistory th(TransactionHistory::kTempTag);
+
+  spdlog::info("Read {0} lines", lines.size());
   if (lines.empty()) return th;
 
   // (\d+)\,((\d\d\/){2}\d{4})\,((\d\d\/){2}\d{4})\,([^\,]*)\,([^\,]*)\,([^\,]*)\,([\w\*\+\#\^\=\.]*)\,(\-?[\d\.]*)\,(\-?[\d\.]*)\,(\-?[\d\.]*)\,(\-?[\d\.]*)\,(\-?[\d\.]*)\,(\-?[\d\.]*)\,([^\,]*)\,
@@ -75,7 +77,7 @@ TransactionHistory Parse(const fs::path& path)
     auto desc = sm[TRANSACTION_DESCRIPTION].str();
     auto inv_name = sm[INVESTMENT_NAME].str();
     auto symbol = Symbol(sm[SYMBOL].str());
-    auto shares = ToNum<Transaction::Quantity>(sm[SHARES].str());
+    auto quantity = ToNum<Transaction::Quantity>(sm[SHARES].str());
     auto price = ToNum<Price>(sm[SHARE_PRICE].str());
     auto principle = ToNum<Price>(sm[PRINCIPLE_AMOUNT].str());
     auto fees = ToNum<Price>(sm[COMMISSION_FEES].str());
@@ -84,10 +86,13 @@ TransactionHistory Parse(const fs::path& path)
     auto account_type = sm[ACCOUNT_TYPE].str();
 
     Transaction::Tags tags;
-    tags.insert(std::string("vg#=") + ToString(std::distance(lines.rbegin(),  l)));
-    tags.insert(std::string("acc#=") + ToString(account_number));
+    tags.Add(kAccountNumberTag, ToString(account_number));
 
-    th.Add(std::move(trade_date), std::move(symbol), *type, price, shares, fees, std::move(tags));
+    if (type.value() == Transaction::Type::SELL)
+        quantity = -quantity;
+
+    auto tr_id = th.Add(std::move(trade_date), std::move(symbol), *type, price, quantity, fees, std::move(tags));
+    spdlog::info("Parsed new transaction with id {0}", tr_id);
   }
 
   return th;

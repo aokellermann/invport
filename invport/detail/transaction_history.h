@@ -29,6 +29,12 @@ class TransactionHistory : public json::JsonBidirectionalSerializable, public fi
   using TransactionSet = std::unordered_set<TransactionID>;
   using Timeline = std::map<Date, TransactionSet>;
 
+  using MemberwiseTransactionSet =
+      std::unordered_set<TransactionID, detail::TransactionMemberwiseHasher, detail::TransactionMemberwiseComparator>;
+  template <typename T>
+  using MemberwiseTransactionMap = std::
+      unordered_map<TransactionID, T, detail::TransactionMemberwiseHasher, detail::TransactionMemberwiseComparator>;
+
  private:
   explicit TransactionHistory(const file::Path& relative_path = "transaction_history",
                               file::Directory directory = file::HOME)
@@ -41,7 +47,7 @@ class TransactionHistory : public json::JsonBidirectionalSerializable, public fi
   };
 
  public:
-  static const TempTag kTempTag;
+  inline static const TempTag kTempTag;
 
   explicit TransactionHistory(const TempTag&) : file::FileIoBase(std::to_string(std::rand()), file::Directory::TEMP) {}
 
@@ -54,6 +60,9 @@ class TransactionHistory : public json::JsonBidirectionalSerializable, public fi
   auto end() { return timeline_.end(); }
   [[nodiscard]] auto begin() const { return timeline_.begin(); }
   [[nodiscard]] auto end() const { return timeline_.end(); }
+  auto Find(const Date& date) { return timeline_.find(date); }
+  [[nodiscard]] auto Find(const Date& date) const { return timeline_.find(date); }
+  auto operator[](const Date& date) { return timeline_[date]; }
 
   /**
    * Adds a transaction to the timeline.
@@ -72,12 +81,12 @@ class TransactionHistory : public json::JsonBidirectionalSerializable, public fi
    * Removes a transaction from the timeline.
    * @param id the id of the transaction to remove
    */
-  void Remove(const TransactionID& id);
+  std::pair<Timeline::iterator, bool> Remove(const TransactionID& id);
 
   /**
    * Merges two TransactionHistorys
    */
-  friend void Merge(TransactionHistory& lhs, TransactionHistory& rhs) { lhs.timeline_.merge(rhs.timeline_); }
+  void Merge(const TransactionHistory& other, const std::unordered_set<Transaction::Tag>& exclude_tags = {});
 
   /**
    * Gets the total number of shares per symbol until then given date.

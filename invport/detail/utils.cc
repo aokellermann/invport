@@ -57,4 +57,20 @@ Date::Date(const std::string& str, Format format)
   month = month_l;
   year = year_l;
 }
+
+[[nodiscard]] std::string Date::ToString(Format format) const
+{
+  if (IsZero()) throw std::runtime_error("Date is Zero");
+
+  auto first = inv::ToString(day);
+  auto second = inv::ToString(month);
+  auto third = inv::ToString(static_cast<int>(year) + Date::kYearOffset);
+
+  auto& day_s = format == DDMMYYYY ? first : second;
+  auto& month_s = format == DDMMYYYY ? second : first;
+  auto& year_s = third;
+
+  return std::move(day_s) + '/' + std::move(month_s) + '/' + std::move(third);
+}
+
 }  // namespace inv

@@ -34,7 +34,7 @@ void TransactionHistory::ToTreeStore(Gtk::TreeStore& tree) const
     if (!transactions.empty())
     {
       Gtk::TreeRow date_row = *tree.append();
-      date_row.set_value(Transaction::Field::DATE, date.ToString());
+      date_row.set_value(Transaction::Field::DATE, date.ToString(Date::Format::MMDDYYYY));
       for (const auto& id : transactions)
       {
         Gtk::TreeRow tr_row = *tree.append(date_row.children());
@@ -44,17 +44,33 @@ void TransactionHistory::ToTreeStore(Gtk::TreeStore& tree) const
   }
 }
 
-void TransactionHistory::Remove(const TransactionID& id)
+std::pair<TransactionHistory::Timeline::iterator, bool> TransactionHistory::Remove(const TransactionID& id)
 {
   if (const auto* tr_ptr = TransactionPool::Find(id); tr_ptr != nullptr)
   {
     if (const auto iter = timeline_.find(tr_ptr->date); iter != timeline_.end())
     {
-      if (iter->second.erase(id) && iter->second.empty())
+      if (iter->second.erase(id))
       {
-        timeline_.erase(iter);
+        if (iter->second.empty()) return {timeline_.erase(iter), true};
+        return {iter, false};
       }
     }
+  }
+  return {timeline_.end(), false};
+}
+
+void TransactionHistory::Merge(const TransactionHistory& other,
+                               const std::unordered_set<TransactionHistory::Transaction::Tag>& exclude_tags)
+{
+  TransactionSet exclude_set;
+  for (const auto& tag : exclude_tags) exclude_set.merge(GetAssociatedTransactions(tag));
+
+  for (const auto& [date, trs] : other)
+  {
+    auto& date_ref = timeline_[date];
+    for (const auto& tr_id : trs)
+      if (!exclude_set.count(tr_id)) date_ref.insert(tr_id);
   }
 }
 
@@ -101,7 +117,7 @@ TransactionHistory::GetAssociatedTransactions()
   {
     for (const auto& id : transactions)
     {
-      for (const auto& tag : TransactionPool::Find(id)->tags) map[tag].insert(id);
+      for (const auto& tag : TransactionPool::Find(id)->tags) map[tag.first].insert(id);
     }
   }
   return map;

@@ -25,6 +25,36 @@ constexpr const char* const kSellStr = "Sell";
 std::string TypeToString(const Transaction::Type t) { return t == Transaction::Type::BUY ? kBuyStr : kSellStr; }
 }  // namespace
 
+Transaction::Tags& Transaction::Tags::operator=(const json::Json& json)
+{
+  for (const auto& jstr : json)
+  {
+    auto vec = Split(jstr.get<std::string>());
+    if (vec.size() == 2)
+      Add(std::move(vec[0]), std::move(vec[1]));
+    else if (vec.size() == 1)
+      Add(std::move(vec[0]));
+  }
+  return *this;
+}
+
+Transaction::Tags::operator std::unordered_set<std::string>() const noexcept
+{
+  std::unordered_set<std::string> ts;
+  ts.reserve(size());
+  for (const auto& [key, value] : *this) ts.insert(value.has_value() ? key + "=" + value.value() : key);
+  return ts;
+}
+
+Transaction::Tags::operator json::Json() const noexcept { return operator std::unordered_set<std::string>(); }
+
+std::unordered_set<Transaction::Tag> Transaction::Tags::Keys() const
+{
+  std::unordered_set<Tag> set;
+  for (const auto& [key, value] : *this) set.insert(key);
+  return set;
+}
+
 Transaction Transaction::Factory(const ID id, const json::Json& input_json)
 {
   Transaction tr(id);
@@ -52,13 +82,15 @@ Transaction Transaction::Factory(Transaction::ID id, Date d, Symbol s, Transacti
 void Transaction::ToTreeRow(Gtk::TreeRow& row) const
 {
   row.set_value(Field::UNIQUE_ID, ToString(id));
-  row.set_value(Field::DATE, date.ToString());
+  row.set_value(Field::DATE, date.ToString(Date::Format::MMDDYYYY));
   row.set_value(Field::SYMBOL, symbol.Get());
   row.set_value(Field::TYPE, TypeToString(type));
   row.set_value(Field::QUANTITY, ToString(quantity));
   row.set_value(Field::PRICE, ToString(price));
   row.set_value(Field::FEE, ToString(fee));
-  row.set_value(Field::TAGS, Join(tags.begin(), tags.end(), ", "));
+  std::unordered_set<std::string> tag_set = tags;
+  row.set_value(Field::TAGS,
+                Join(std::make_move_iterator(tag_set.begin()), std::make_move_iterator(tag_set.end()), ", "));
   row.set_value(Field::COMMENT, comment);
 }
 
@@ -94,7 +126,7 @@ ErrorCode Transaction::Deserialize(const json::Json& input_json)
     input_json.find(kJsonPriceKey)->get_to(price);
     input_json.find(kJsonQuantityKey)->get_to(quantity);
     input_json.find(kJsonFeeKey)->get_to(fee);
-    input_json.find(kJsonTagsKey)->get_to(tags);
+    tags = input_json[kJsonTagsKey];
     input_json.find(kJsonCommentKey)->get_to(comment);
   }
   catch (const std::exception& e)
@@ -108,7 +140,19 @@ ErrorCode Transaction::Deserialize(const json::Json& input_json)
 bool Transaction::MemberwiseEquals(const Transaction& other) const
 {
   return date == other.date && symbol == other.symbol && type == other.type && price == other.price &&
-         quantity == other.quantity && fee == other.fee && tags == other.tags && comment == other.comment;
+         quantity == other.quantity && fee == other.fee;
 }
 
+bool TransactionMemberwiseComparator::operator()(const Transaction::ID& left, const Transaction::ID& right) const
+{
+  return TransactionPool::Find(left)->MemberwiseEquals(*TransactionPool::Find(right));
+}
+
+std::size_t TransactionMemberwiseHasher::operator()(const Transaction::ID& id) const
+{
+  const auto& tr = *TransactionPool::Find(id);
+  std::vector<std::string> v = {tr.date.ToString(), tr.symbol.Get(),       TypeToString(tr.type),
+                                ToString(tr.price), ToString(tr.quantity), ToString(tr.fee)};
+  return std::hash<std::string>()(Join(v.begin(), v.end(), "."));
+}
 }  // namespace inv::detail
