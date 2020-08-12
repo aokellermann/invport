@@ -33,7 +33,8 @@ void Portfolio::RefreshGains()
   for (const auto& [symbol, total] : totals) symbols.insert(symbol);
 
   auto resp = iex::Get<iex::Endpoint::Type::QUOTE>(symbols);
-  if (resp.second.Failure()) {
+  if (resp.second.Failure())
+  {
     spdlog::error(ErrorCode("Portfolio::RefreshGains failed", resp.second));
     return;
   }
@@ -52,7 +53,7 @@ void Portfolio::RefreshGains()
     if (ts.has_value())
     {
       std::time_t seconds = std::chrono::duration_cast<std::chrono::seconds>(ts.value()).count();
-      auto *tm = std::localtime(&seconds);
+      auto* tm = std::localtime(&seconds);
       char buffer[26];
       std::strftime(buffer, 26, "%m-%d %I:%M:%S", tm);
       row.set_value(TIMESTAMP, std::string(buffer));
@@ -86,7 +87,7 @@ void Portfolio::RefreshGains()
     if (price_1d.has_value())
     {
       auto value_1d = final_quantity * price_1d.value();
-      auto gain_1d =  final_value - value_1d;
+      auto gain_1d = final_value - value_1d;
       auto gain_1d_percent = 100.0 * ((final_value / value_1d) - 1.0);
 
       total_value_1d += value_1d;
