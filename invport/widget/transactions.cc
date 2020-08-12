@@ -31,7 +31,9 @@ void Transactions::RemoveTransactionButtonSignalActivate()
 
 void Transactions::VanguardFileChooserButtonSignalFileSet()
 {
-  const auto path = GetWidget<Gtk::FileChooserButton>(builder, "vanguard_file_chooser_button").get_filename();
+  const auto path = vanguard_file_chooser_button_.get_filename();
+  vanguard_file_chooser_button_.unselect_all();
+
   auto th = vanguard::Parse(path);
   for (auto date_iter = th.begin(); date_iter != th.end();)
   {

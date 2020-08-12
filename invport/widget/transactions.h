@@ -25,6 +25,7 @@ class Transactions : public Gtk::Paned, private WidgetBase
         transaction_history_(th),
         transaction_creator_(
             GetWidgetDerived<TransactionCreator>(builder, "transaction_creator_dialog", transaction_history_)),
+        vanguard_file_chooser_button_(GetWidget<Gtk::FileChooserButton>(bldr, "vanguard_file_chooser_button")),
         transactions_tree_view_(GetWidget<Gtk::TreeView>(builder, "transaction_history_tree_view")),
         transactions_list_store_(GetObject<Gtk::TreeStore>(builder, "transaction_history_tree_store"))
   {
@@ -36,9 +37,8 @@ class Transactions : public Gtk::Paned, private WidgetBase
         .signal_clicked()
         .connect(sigc::mem_fun(*this, &Transactions::RemoveTransactionButtonSignalActivate));
 
-    GetWidget<Gtk::FileChooserButton>(bldr, "vanguard_file_chooser_button")
-        .signal_file_set()
-        .connect(sigc::mem_fun(*this, &Transactions::VanguardFileChooserButtonSignalFileSet));
+    vanguard_file_chooser_button_.signal_file_set().connect(
+        sigc::mem_fun(*this, &Transactions::VanguardFileChooserButtonSignalFileSet));
 
     transaction_creator_.signal_hide().connect(sigc::mem_fun(*this, &Transactions::RefreshAndFlush));
 
@@ -60,6 +60,7 @@ class Transactions : public Gtk::Paned, private WidgetBase
   TransactionHistory& transaction_history_;
 
   TransactionCreator& transaction_creator_;
+  Gtk::FileChooserButton& vanguard_file_chooser_button_;
 
   Gtk::TreeView& transactions_tree_view_;
   Gtk::TreeStore& transactions_list_store_;

@@ -520,6 +520,19 @@ Author: Antony Kellermann
                   </packing>
                 </child>
                 <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Select a Vanguard CSV file:</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                    <property name="secondary">True</property>
+                  </packing>
+                </child>
+                <child>
                   <object class="GtkFileChooserButton" id="vanguard_file_chooser_button">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
@@ -531,7 +544,8 @@ Author: Antony Kellermann
                   <packing>
                     <property name="expand">True</property>
                     <property name="fill">True</property>
-                    <property name="position">2</property>
+                    <property name="position">3</property>
+                    <property name="secondary">True</property>
                   </packing>
                 </child>
               </object>
