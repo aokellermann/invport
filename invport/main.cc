@@ -88,6 +88,20 @@ int main(int argc, char **argv)
   }
 
   spdlog::info("API keys are now populated.");
+  spdlog::info("Initializing iex.");
+
+  iex::Keys keys;
+  keys.public_key = keychain.Get(inv::key::Keychain::KeyType::PUBLIC).first;
+  keys.secret_key = keychain.Get(inv::key::Keychain::KeyType::SECRET).first;
+  keys.public_sandbox_key = keychain.Get(inv::key::Keychain::KeyType::SANDBOX_PUBLIC).first;
+  keys.secret_sandbox_key = keychain.Get(inv::key::Keychain::KeyType::SANDBOX_SECRET).first;
+  auto iex_init_ec = iex::Init(std::move(keys));
+  if (iex_init_ec.Failure())
+  {
+    spdlog::error(iex_init_ec);
+    return EXIT_FAILURE;
+  }
+
   spdlog::info("Opening main window.");
 
   return application->run(inv::widget::GetWidgetDerived<inv::widget::MainWindow>(builder, "main_window"));

@@ -32,8 +32,11 @@ class TransactionHistory : public json::JsonBidirectionalSerializable, public fi
   using MemberwiseTransactionSet =
       std::unordered_set<TransactionID, detail::TransactionMemberwiseHasher, detail::TransactionMemberwiseComparator>;
   template <typename T>
-  using MemberwiseTransactionMap = std::
-      unordered_map<TransactionID, T, detail::TransactionMemberwiseHasher, detail::TransactionMemberwiseComparator>;
+  using MemberwiseTransactionMap = std::unordered_map<TransactionID, T, detail::TransactionMemberwiseHasher,
+                                                      detail::TransactionMemberwiseComparator>;
+
+  using TotalsMap = iex::SymbolMap<Totals>;
+  using PortfolioTimeline = DateMap<TotalsMap>;
 
  private:
   explicit TransactionHistory(const file::Path& relative_path = "transaction_history",
@@ -63,6 +66,8 @@ class TransactionHistory : public json::JsonBidirectionalSerializable, public fi
   auto Find(const Date& date) { return timeline_.find(date); }
   [[nodiscard]] auto Find(const Date& date) const { return timeline_.find(date); }
   auto operator[](const Date& date) { return timeline_[date]; }
+  auto LowerBound(const Date& date) { return timeline_.lower_bound(date); }
+  [[nodiscard]] auto LowerBound(const Date& date) const { return timeline_.lower_bound(date); }
 
   /**
    * Adds a transaction to the timeline.
@@ -94,8 +99,11 @@ class TransactionHistory : public json::JsonBidirectionalSerializable, public fi
    * @param end_date the stopping date, inclusive, or zero, which will evaluate until end()
    * @return symbol map Totals
    */
-  [[nodiscard]] iex::SymbolMap<Totals> GetTotals(const Date& start_date = Date::Zero(),
-                                                 const Date& end_date = Date::Zero()) const;
+  [[nodiscard]] TotalsMap GetTotals(const Date& start_date = Date::Zero(),
+                                                 const Date& end_date = Date::Zero(),
+                                                 bool reset_on_sell_all = false) const;
+
+  [[nodiscard]] TotalsMap GetTotals(bool reset_on_sell_all) const;
 
   [[nodiscard]] TransactionSet GetAssociatedTransactions(const Transaction::Tag& tag);
 

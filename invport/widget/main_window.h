@@ -11,6 +11,7 @@
 #include "invport/detail/common.h"
 #include "invport/detail/transaction_history.h"
 #include "invport/widget/base.h"
+#include "invport/widget/portfolio.h"
 #include "invport/widget/transactions.h"
 
 namespace inv::widget
@@ -22,7 +23,8 @@ class MainWindow : public Gtk::ApplicationWindow, private WidgetBase
       : Gtk::ApplicationWindow(obj),
         WidgetBase(bldr),
         transaction_history_(TransactionHistory::Factory()),
-        transaction_tab_(GetWidgetDerived<Transactions>(bldr, "transactions_tab_paned", transaction_history_))
+        transaction_tab_(GetWidgetDerived<Transactions>(bldr, "transactions_tab_paned", transaction_history_)),
+        portfolio_tab_(GetWidgetDerived<Portfolio>(bldr, "portfolio_tab_notebook", transaction_history_))
   {
   }
 
@@ -30,5 +32,6 @@ class MainWindow : public Gtk::ApplicationWindow, private WidgetBase
   TransactionHistory transaction_history_;
 
   Transactions& transaction_tab_;
+  Portfolio& portfolio_tab_;
 };
 }  // namespace inv::widget

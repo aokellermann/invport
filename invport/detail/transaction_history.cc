@@ -74,8 +74,9 @@ void TransactionHistory::Merge(const TransactionHistory& other,
   }
 }
 
-[[nodiscard]] iex::SymbolMap<TransactionHistory::Totals> TransactionHistory::GetTotals(const Date& start_date,
-                                                                                       const Date& end_date) const
+[[nodiscard]] TransactionHistory::TotalsMap TransactionHistory::GetTotals(const Date& start_date,
+                                                                          const Date& end_date,
+                                                                          bool reset_on_sell_all) const
 {
   const auto begin = !start_date.IsZero() ? timeline_.lower_bound(start_date) : timeline_.begin();
   const auto end = !end_date.IsZero() ? timeline_.upper_bound(end_date) : timeline_.end();
@@ -88,11 +89,17 @@ void TransactionHistory::Merge(const TransactionHistory& other,
       const auto* tr_ptr = TransactionPool::Find(id);
       if (tr_ptr)
       {
-        map[tr_ptr->symbol] += Totals(*tr_ptr);
+        auto& ref = (map[tr_ptr->symbol] += Totals(*tr_ptr, reset_on_sell_all));
+        if (reset_on_sell_all && ref.quantity == 0) map.erase(tr_ptr->symbol);
       }
     }
   }
   return map;
+}
+
+[[nodiscard]] TransactionHistory::TotalsMap TransactionHistory::GetTotals(bool reset_on_sell_all) const
+{
+  return GetTotals(Date::Zero(), Date::Zero(), reset_on_sell_all);
 }
 
 TransactionHistory::TransactionSet TransactionHistory::GetAssociatedTransactions(

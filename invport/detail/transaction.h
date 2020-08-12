@@ -68,10 +68,11 @@ struct Transaction : json::JsonBidirectionalSerializable
   struct Totals
   {
     Totals() = default;
-    explicit Totals(const Transaction& tr)
+    Totals(const Transaction& tr, bool reset_on_sell_all)
         : spent(tr.type == Transaction::Type::BUY ? tr.price * tr.quantity : -tr.price * tr.quantity),
           quantity(tr.type == Transaction::Type::BUY ? tr.quantity : -tr.quantity),
-          fees(tr.fee)
+          fees(tr.fee),
+          reset_on_sell_all_(reset_on_sell_all)
     {
     }
 
@@ -80,12 +81,21 @@ struct Transaction : json::JsonBidirectionalSerializable
       spent += other.spent;
       quantity += other.quantity;
       fees += other.fees;
+
+      if (other.reset_on_sell_all_ && (FloatingEqual(quantity, 0) || quantity < 0))
+      {
+        spent = 0;
+        quantity = 0;
+        fees = 0;
+      }
       return *this;
     }
 
     Price spent;
     Transaction::Quantity quantity;
     Price fees;
+
+    bool reset_on_sell_all_;
   };
 
   /**

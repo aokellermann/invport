@@ -153,6 +153,9 @@ struct Date
   unsigned year : kYearBitLength;
 };
 
+template <typename T>
+using DateMap = std::map<Date, T>;
+
 // endregion Date
 
 }  // namespace inv

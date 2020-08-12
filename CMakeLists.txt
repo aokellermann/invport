@@ -74,6 +74,8 @@ set(exec_sources
         widget/main_window.h
         widget/transactions.cc
         widget/transactions.h
+        widget/portfolio.cc
+        widget/portfolio.h
         )
 
 # Specify source directory.
