@@ -10,6 +10,7 @@
 
 #include "invport/detail/keychain.h"
 #include "invport/widget/key_selector.h"
+#include "invport/widget/main_window.h"
 #include "invport/widget/util.h"
 
 int main(int argc, char **argv)
@@ -87,6 +88,7 @@ int main(int argc, char **argv)
   }
 
   spdlog::info("API keys are now populated.");
+  spdlog::info("Opening main window.");
 
-  return EXIT_SUCCESS;
+  return application->run(inv::widget::GetWidgetDerived<inv::widget::MainWindow>(builder, "main_window"));
 }

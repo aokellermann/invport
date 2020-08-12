@@ -56,10 +56,24 @@ set(exec_sources
         detail/keychain.cc
         detail/keychain.h
         detail/common.h
+        detail/transaction.cc
+        detail/transaction.h
+        detail/transaction_history.cc
+        detail/transaction_history.h
+        detail/utils.cc
+        detail/utils.h
+        detail/vanguard.cc
+        detail/vanguard.h
         widget/base.h
         widget/util.h
         widget/key_selector.cc
         widget/key_selector.h
+        widget/transaction_creator.cc
+        widget/transaction_creator.h
+        widget/main_window.cc
+        widget/main_window.h
+        widget/transactions.cc
+        widget/transactions.h
         )
 
 # Specify source directory.
@@ -110,6 +124,8 @@ if (BUILD_TESTING)
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
             $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
             )
+
+    target_link_libraries(invport_lib ${GTKMM_LIBRARIES} iex::iex spdlog::spdlog)
 
     enable_testing()
     set(INSTALL_GTEST OFF)
